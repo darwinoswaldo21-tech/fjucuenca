@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, auth } from './firebase';
 import { collection, addDoc, getDocs, orderBy, query } from 'firebase/firestore';
 
-function Feed({ usuario, onLogout, onAdmin }) {
+function Feed({ usuario, onLogout, onAdmin, onChat }) {
   const [posts, setPosts] = useState([]);
   const [nuevo, setNuevo] = useState('');
   const [loading, setLoading] = useState(false);
@@ -70,9 +70,12 @@ function Feed({ usuario, onLogout, onAdmin }) {
         <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
           {onAdmin && (
             <button onClick={onAdmin} style={{background:'#B8860B',color:'white',border:'none',padding:'8px 16px',borderRadius:'8px',cursor:'pointer',fontSize:'14px',fontWeight:'600'}}>
-              Panel Admin
+              Admin
             </button>
           )}
+          <button onClick={onChat} style={{background:'rgba(255,255,255,0.2)',color:'white',border:'none',padding:'8px 16px',borderRadius:'8px',cursor:'pointer',fontSize:'14px',fontWeight:'600'}}>
+            💬 Chat
+          </button>
           <span style={{color:'rgba(255,255,255,0.8)',fontSize:'14px'}}>Hola, {usuario.nombre}</span>
           <button onClick={onLogout} style={{background:'rgba(255,255,255,0.2)',color:'white',border:'none',padding:'8px 16px',borderRadius:'8px',cursor:'pointer',fontSize:'14px'}}>Salir</button>
         </div>

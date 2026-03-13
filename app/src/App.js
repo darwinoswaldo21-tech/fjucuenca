@@ -6,6 +6,7 @@ import Login from './Login';
 import Register from './Register';
 import Feed from './Feed';
 import Admin from './Admin';
+import Chat from './Chat';
 
 function App() {
   const [pantalla, setPantalla] = useState('login');
@@ -45,10 +46,13 @@ function App() {
         <Register onBack={() => setPantalla('login')} />
       )}
       {pantalla === 'feed' && usuario && (
-        <Feed usuario={usuario} onLogout={handleLogout} onAdmin={usuario.rol==='admin'?()=>setPantalla('admin'):null} />
+        <Feed usuario={usuario} onLogout={handleLogout} onAdmin={usuario.rol==='admin'?()=>setPantalla('admin'):null} onChat={()=>setPantalla('chat')} />
       )}
       {pantalla === 'admin' && usuario && (
         <Admin usuario={usuario} onLogout={handleLogout} onFeed={()=>setPantalla('feed')} />
+      )}
+      {pantalla === 'chat' && usuario && (
+        <Chat usuario={usuario} onBack={()=>setPantalla('feed')} />
       )}
     </div>
   );
