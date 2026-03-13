@@ -11,4 +11,9 @@ touch index.html
   <h1>¡Bienvenido a FJU Cuenca!</h1>
   <p>Red social de la Federación de Juventudes Unidas de Cuenca.</p>
 </body>
-</html>
+</html>git add .
+git commit -m "Primera pagina FJU Cuenca"
+git add .
+    
+    # fjucuenca
+Red social de la FJU Cuenca

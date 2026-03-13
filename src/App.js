@@ -5,7 +5,6 @@ import { doc, getDoc } from 'firebase/firestore';
 import Login from './Login';
 import Register from './Register';
 import Feed from './Feed';
-import Admin from './Admin';
 
 function App() {
   const [pantalla, setPantalla] = useState('login');
@@ -16,13 +15,8 @@ function App() {
       if (user) {
         const snap = await getDoc(doc(db, 'usuarios', user.uid));
         if (snap.exists()) {
-          const data = snap.data();
-          setUsuario({...data, uid: user.uid});
-          if (data.rol === 'admin') {
-            setPantalla('admin');
-          } else {
-            setPantalla('feed');
-          }
+          setUsuario({...snap.data(), uid: user.uid});
+          setPantalla('feed');
         }
       } else {
         setUsuario(null);
@@ -45,10 +39,7 @@ function App() {
         <Register onBack={() => setPantalla('login')} />
       )}
       {pantalla === 'feed' && usuario && (
-        <Feed usuario={usuario} onLogout={handleLogout} onAdmin={usuario.rol==='admin'?()=>setPantalla('admin'):null} />
-      )}
-      {pantalla === 'admin' && usuario && (
-        <Admin usuario={usuario} onLogout={handleLogout} onFeed={()=>setPantalla('feed')} />
+        <Feed usuario={usuario} onLogout={handleLogout} />
       )}
     </div>
   );
