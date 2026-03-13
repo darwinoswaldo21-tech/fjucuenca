@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, auth } from './firebase';
 import { collection, addDoc, getDocs, orderBy, query } from 'firebase/firestore';
 
-function Feed({ usuario, onLogout }) {
+function Feed({ usuario, onLogout, onAdmin }) {
   const [posts, setPosts] = useState([]);
   const [nuevo, setNuevo] = useState('');
   const [loading, setLoading] = useState(false);
@@ -39,11 +39,16 @@ function Feed({ usuario, onLogout }) {
         autor: usuario.nombre,
         autorId: auth.currentUser.uid,
         fecha: new Date().toISOString(),
-        aprobado: false,
+        aprobado: usuario.rol === 'admin' || usuario.rol === 'moderador',
         likes: 0
       });
       setNuevo('');
-      mostrarNotif('Post enviado! El moderador lo revisara pronto.', 'exito');
+      if (usuario.rol === 'admin' || usuario.rol === 'moderador') {
+        mostrarNotif('Post publicado!', 'exito');
+      } else {
+        mostrarNotif('Post enviado! El moderador lo revisara pronto.', 'exito');
+      }
+      cargarPosts();
     } catch (err) {
       mostrarNotif('Error al publicar', 'error');
     }
@@ -62,7 +67,12 @@ function Feed({ usuario, onLogout }) {
           <img src="/fondo1.jpg" alt="FJU" style={{width:'40px',height:'40px',borderRadius:'50%',objectFit:'cover',border:'2px solid white'}} />
           <span style={{color:'white',fontWeight:'700',fontSize:'18px'}}>FJU Cuenca</span>
         </div>
-        <div style={{display:'flex',alignItems:'center',gap:'16px'}}>
+        <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
+          {onAdmin && (
+            <button onClick={onAdmin} style={{background:'#B8860B',color:'white',border:'none',padding:'8px 16px',borderRadius:'8px',cursor:'pointer',fontSize:'14px',fontWeight:'600'}}>
+              Panel Admin
+            </button>
+          )}
           <span style={{color:'rgba(255,255,255,0.8)',fontSize:'14px'}}>Hola, {usuario.nombre}</span>
           <button onClick={onLogout} style={{background:'rgba(255,255,255,0.2)',color:'white',border:'none',padding:'8px 16px',borderRadius:'8px',cursor:'pointer',fontSize:'14px'}}>Salir</button>
         </div>
@@ -84,13 +94,13 @@ function Feed({ usuario, onLogout }) {
             </div>
           </div>
         </div>
-        {posts.length === 0 && (
+        {posts.filter(p=>p.aprobado).length === 0 && (
           <div style={{textAlign:'center',padding:'40px',color:'#aaa'}}>
             <p style={{fontSize:'48px'}}>✝️</p>
             <p>Aun no hay publicaciones. Se el primero en compartir!</p>
           </div>
         )}
-        {posts.map(post => (
+        {posts.filter(p=>p.aprobado).map(post => (
           <div key={post.id} style={{background:'white',borderRadius:'16px',padding:'20px',marginBottom:'16px',boxShadow:'0 2px 8px rgba(0,0,0,0.08)'}}>
             <div style={{display:'flex',alignItems:'center',gap:'12px',marginBottom:'12px'}}>
               <div style={{width:'40px',height:'40px',borderRadius:'50%',background:'linear-gradient(135deg,#1B2A6B,#3d5a99)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'700',fontSize:'16px'}}>
@@ -100,7 +110,6 @@ function Feed({ usuario, onLogout }) {
                 <p style={{margin:0,fontWeight:'700',color:'#1B2A6B'}}>{post.autor}</p>
                 <p style={{margin:0,fontSize:'12px',color:'#aaa'}}>{new Date(post.fecha).toLocaleDateString('es-EC',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})}</p>
               </div>
-              {!post.aprobado && <span style={{marginLeft:'auto',background:'#fff3cd',color:'#856404',padding:'4px 10px',borderRadius:'20px',fontSize:'12px',fontWeight:'600'}}>Pendiente</span>}
             </div>
             <p style={{margin:0,fontSize:'15px',lineHeight:'1.6',color:'#333'}}>{post.texto}</p>
           </div>
