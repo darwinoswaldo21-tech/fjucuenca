@@ -8,11 +8,16 @@ import Feed from './Feed';
 import Admin from './Admin';
 import Chat from './Chat';
 import ChatPrivado from './ChatPrivado';
+import HelpScreen from './modules/help/HelpScreen';
+import HelpChatScreen from './modules/help/HelpChatScreen';
+import ResourcesScreen from './modules/help/ResourcesScreen';
+import MediaScreen from './modules/medios/MediaScreen';
 
 function App() {
   const [pantalla, setPantalla] = useState('login');
   const [usuario, setUsuario] = useState(null);
   const [cargando, setCargando] = useState(true);
+  const [helpCategory, setHelpCategory] = useState(null);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
@@ -42,16 +47,66 @@ function App() {
     setPantalla('login');
   };
 
-  if (cargando) return <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh',background:'#1B2A6B',color:'white',fontSize:'18px'}}>✝️ Cargando FJU...</div>;
+  if (cargando) return (
+    <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh',background:'#1B2A6B',color:'white',fontSize:'18px'}}>
+      ✝️ Cargando FJU...
+    </div>
+  );
 
   return (
     <div>
-      {pantalla === 'login' && <Login onRegister={() => setPantalla('register')} />}
-      {pantalla === 'register' && <Register onBack={() => setPantalla('login')} />}
-      {pantalla === 'feed' && usuario && <Feed usuario={usuario} onLogout={handleLogout} onAdmin={usuario.rol==='admin'?()=>setPantalla('admin'):null} onChat={()=>setPantalla('chat')} onChatPrivado={()=>setPantalla('chatPrivado')} />}
-      {pantalla === 'admin' && usuario && <Admin usuario={usuario} onLogout={handleLogout} onFeed={()=>setPantalla('feed')} />}
-      {pantalla === 'chat' && usuario && <Chat usuario={usuario} onBack={()=>setPantalla('feed')} />}
-      {pantalla === 'chatPrivado' && usuario && <ChatPrivado usuario={usuario} onBack={()=>setPantalla('feed')} />}
+      {pantalla === 'login' && (
+        <Login onRegister={() => setPantalla('register')} />
+      )}
+      {pantalla === 'register' && (
+        <Register onBack={() => setPantalla('login')} />
+      )}
+      {pantalla === 'feed' && usuario && (
+        <Feed
+          usuario={usuario}
+          onLogout={handleLogout}
+          onAdmin={usuario.rol === 'admin' ? () => setPantalla('admin') : null}
+          onChat={() => setPantalla('chat')}
+          onChatPrivado={() => setPantalla('chatPrivado')}
+          onHelp={() => setPantalla('help')}
+          onMedias={() => setPantalla('medios')}
+        />
+      )}
+      {pantalla === 'admin' && usuario && (
+        <Admin usuario={usuario} onLogout={handleLogout} onFeed={() => setPantalla('feed')} />
+      )}
+      {pantalla === 'chat' && usuario && (
+        <Chat usuario={usuario} onBack={() => setPantalla('feed')} />
+      )}
+      {pantalla === 'chatPrivado' && usuario && (
+        <ChatPrivado usuario={usuario} onBack={() => setPantalla('feed')} />
+      )}
+      {pantalla === 'help' && usuario && (
+        <HelpScreen
+          onBack={() => setPantalla('feed')}
+          onSelectCategory={(cat) => {
+            setHelpCategory(cat);
+            if (cat === 'resources') {
+              setPantalla('helpResources');
+            } else {
+              setPantalla('helpChat');
+            }
+          }}
+        />
+      )}
+      {pantalla === 'helpChat' && usuario && (
+        <HelpChatScreen
+          currentUser={usuario}
+          category={helpCategory}
+          onBack={() => setPantalla('help')}
+        />
+      )}
+      {pantalla === 'helpResources' && usuario && (
+        <ResourcesScreen onBack={() => setPantalla('help')} />
+      )}
+      {pantalla === 'medios' && usuario && (
+        <MediaScreen usuario={usuario} onBack={() => setPantalla('feed')} />
+      )}
     </div>
   );
 }

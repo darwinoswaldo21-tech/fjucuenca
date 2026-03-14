@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from './firebase';
 import { collection, addDoc, getDocs, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import FeedComments from './FeedComments';
 
-function Feed({ usuario, onLogout, onAdmin }) {
+function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias }) {
   const [posts, setPosts] = useState([]);
   const [nuevo, setNuevo] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,24 +21,21 @@ function Feed({ usuario, onLogout, onAdmin }) {
     setTimeout(() => setNotif(null), 4000);
   };
 
-  const cargarPosts = async () => {
-    try {
-      const q = query(collection(db, 'posts'), orderBy('fecha', 'desc'));
-      const snap = await getDocs(q);
-      setPosts(snap.docs.map(d => ({id: d.id, ...d.data()})));
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   const cargarUsuarios = async () => {
     const snap = await getDocs(collection(db, 'usuarios'));
     setUsuarios(snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.id !== auth.currentUser.uid));
   };
 
   useEffect(() => {
-    cargarPosts();
     cargarUsuarios();
+  }, []);
+
+  useEffect(() => {
+    const q = query(collection(db, 'posts'), orderBy('fecha', 'desc'));
+    const unsub = onSnapshot(q, (snap) => {
+      setPosts(snap.docs.map(d => ({id: d.id, ...d.data()})));
+    });
+    return () => unsub();
   }, []);
 
   useEffect(() => {
@@ -83,7 +81,6 @@ function Feed({ usuario, onLogout, onAdmin }) {
       } else {
         mostrarNotif('Post enviado! El moderador lo revisara pronto.', 'exito');
       }
-      cargarPosts();
     } catch (err) {
       mostrarNotif('Error al publicar', 'error');
     }
@@ -143,6 +140,8 @@ function Feed({ usuario, onLogout, onAdmin }) {
           {notif.tipo==='exito'?'OK: ':'ERROR: '}{notif.msg}
         </div>
       )}
+
+      {/* Navbar */}
       <div style={{background:'#1B2A6B',padding:'16px 24px',display:'flex',alignItems:'center',justifyContent:'space-between',boxShadow:'0 2px 8px rgba(0,0,0,0.2)'}}>
         <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
           <img src="/fondo1.jpg" alt="FJU" style={{width:'40px',height:'40px',borderRadius:'50%',objectFit:'cover',border:'2px solid white'}} />
@@ -152,6 +151,12 @@ function Feed({ usuario, onLogout, onAdmin }) {
           {navBtn('feed', 'Inicio')}
           {navBtn('chat', 'Chat')}
           {navBtn('privado', 'Privado')}
+          <button onClick={onHelp} style={{background:'rgba(255,255,255,0.2)',color:'white',border:'none',padding:'8px 16px',borderRadius:'8px',cursor:'pointer',fontSize:'14px',fontWeight:'600'}}>
+            🙏 Help
+          </button>
+          <button onClick={onMedias} style={{background:'rgba(255,255,255,0.2)',color:'white',border:'none',padding:'8px 16px',borderRadius:'8px',cursor:'pointer',fontSize:'14px',fontWeight:'600'}}>
+            📸 Medios
+          </button>
           {onAdmin && (
             <button onClick={onAdmin} style={{background:'#B8860B',color:'white',border:'none',padding:'8px 16px',borderRadius:'8px',cursor:'pointer',fontSize:'14px',fontWeight:'600'}}>Admin</button>
           )}
@@ -162,23 +167,33 @@ function Feed({ usuario, onLogout, onAdmin }) {
 
       {vista === 'feed' && (
         <div style={{maxWidth:'600px',margin:'24px auto',padding:'0 16px'}}>
+          {/* Crear post */}
           <div style={{background:'white',borderRadius:'16px',padding:'20px',marginBottom:'20px',boxShadow:'0 2px 8px rgba(0,0,0,0.08)'}}>
             <div style={{display:'flex',gap:'12px',alignItems:'flex-start'}}>
               <div style={{width:'40px',height:'40px',borderRadius:'50%',background:'linear-gradient(135deg,#1B2A6B,#3d5a99)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'700',fontSize:'16px',flexShrink:0}}>
                 {usuario.nombre.charAt(0).toUpperCase()}
               </div>
               <div style={{flex:1}}>
-                <textarea placeholder="Comparte algo con la comunidad FJU..." value={nuevo} onChange={(e)=>setNuevo(e.target.value)} style={{width:'100%',padding:'12px',borderRadius:'10px',border:'2px solid #eee',fontSize:'15px',outline:'none',resize:'none',minHeight:'80px',boxSizing:'border-box',fontFamily:'system-ui'}} />
+                <textarea
+                  placeholder="Comparte algo con la comunidad FJU..."
+                  value={nuevo}
+                  onChange={(e)=>setNuevo(e.target.value)}
+                  style={{width:'100%',padding:'12px',borderRadius:'10px',border:'2px solid #eee',fontSize:'15px',outline:'none',resize:'none',minHeight:'80px',boxSizing:'border-box',fontFamily:'system-ui'}}
+                />
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:'8px'}}>
-                  <span style={{color:'#aaa',fontSize:'13px'}}>Comparte con amor</span>
-                  <button onClick={publicar} disabled={loading} style={{padding:'10px 24px',background:'linear-gradient(135deg,#1B2A6B,#3d5a99)',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',cursor:loading?'not-allowed':'pointer',fontWeight:'600'}}>{loading?'Enviando...':'Publicar'}</button>
+                  <span style={{color:'#aaa',fontSize:'13px'}}>Comparte con amor ✝️</span>
+                  <button onClick={publicar} disabled={loading} style={{padding:'10px 24px',background:'linear-gradient(135deg,#1B2A6B,#3d5a99)',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',cursor:loading?'not-allowed':'pointer',fontWeight:'600'}}>
+                    {loading?'Enviando...':'Publicar'}
+                  </button>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Posts */}
           {posts.filter(p=>p.aprobado).length === 0 && (
             <div style={{textAlign:'center',padding:'40px',color:'#aaa'}}>
-              <p style={{fontSize:'48px'}}>+</p>
+              <p style={{fontSize:'48px'}}>✝️</p>
               <p>Aun no hay publicaciones. Se el primero en compartir!</p>
             </div>
           )}
@@ -190,10 +205,44 @@ function Feed({ usuario, onLogout, onAdmin }) {
                 </div>
                 <div>
                   <p style={{margin:0,fontWeight:'700',color:'#1B2A6B'}}>{post.autor}</p>
-                  <p style={{margin:0,fontSize:'12px',color:'#aaa'}}>{new Date(post.fecha).toLocaleDateString('es-EC',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})}</p>
+                  <p style={{margin:0,fontSize:'12px',color:'#aaa'}}>
+                    {new Date(post.fecha).toLocaleDateString('es-EC',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})}
+                  </p>
                 </div>
+                {post.tipo === 'foto' && (
+                  <span style={{marginLeft:'auto',background:'#EEF1FF',color:'#1B2A6B',fontSize:'11px',padding:'3px 10px',borderRadius:20,fontWeight:600}}>📸 Medios</span>
+                )}
+                {(post.tipo === 'video' || post.tipo === 'videoDirecto') && (
+                  <span style={{marginLeft:'auto',background:'#EEF1FF',color:'#1B2A6B',fontSize:'11px',padding:'3px 10px',borderRadius:20,fontWeight:600}}>🎥 Medios</span>
+                )}
               </div>
               <p style={{margin:0,fontSize:'15px',lineHeight:'1.6',color:'#333'}}>{post.texto}</p>
+              {post.imagen && !post.videoId && !post.videoUrl && (
+                <img
+                  src={post.imagen}
+                  alt="foto compartida"
+                  style={{width:'100%',borderRadius:12,marginTop:12,maxHeight:400,objectFit:'cover',cursor:'pointer'}}
+                  onClick={() => window.open(post.imagen, '_blank')}
+                />
+              )}
+              {post.videoId && (
+                <iframe
+                  src={`https://www.youtube.com/embed/${post.videoId}`}
+                  title={post.texto}
+                  style={{width:'100%',height:300,borderRadius:12,marginTop:12,border:'none'}}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              )}
+              {post.videoUrl && (
+                <video
+                  src={post.videoUrl}
+                  controls
+                  playsInline
+                  style={{width:'100%',borderRadius:12,marginTop:12,maxHeight:400}}
+                />
+              )}
+              <FeedComments postId={post.id} />
             </div>
           ))}
         </div>
@@ -202,7 +251,7 @@ function Feed({ usuario, onLogout, onAdmin }) {
       {vista === 'chat' && (
         <div style={{display:'flex',flexDirection:'column',height:'calc(100vh - 73px)'}}>
           <div style={{flex:1,overflowY:'auto',padding:'20px',maxWidth:'700px',width:'100%',margin:'0 auto',boxSizing:'border-box'}}>
-            {mensajesChat.length === 0 && <div style={{textAlign:'center',padding:'40px',color:'#aaa'}}><p style={{fontSize:'48px'}}>chat</p><p>Aun no hay mensajes!</p></div>}
+            {mensajesChat.length === 0 && <div style={{textAlign:'center',padding:'40px',color:'#aaa'}}><p style={{fontSize:'48px'}}>💬</p><p>Aun no hay mensajes!</p></div>}
             {mensajesChat.map(msg => {
               const esMio = msg.autorId === auth.currentUser?.uid;
               return (
@@ -254,7 +303,7 @@ function Feed({ usuario, onLogout, onAdmin }) {
             <p style={{margin:0,fontWeight:'700',color:'#1B2A6B'}}>{contacto.nombre}</p>
           </div>
           <div style={{flex:1,overflowY:'auto',padding:'20px',maxWidth:'700px',width:'100%',margin:'0 auto',boxSizing:'border-box'}}>
-            {mensajesPrivado.length === 0 && <div style={{textAlign:'center',padding:'40px',color:'#aaa'}}><p style={{fontSize:'48px'}}>lock</p><p>Conversacion privada con {contacto.nombre}</p></div>}
+            {mensajesPrivado.length === 0 && <div style={{textAlign:'center',padding:'40px',color:'#aaa'}}><p style={{fontSize:'48px'}}>🔒</p><p>Conversacion privada con {contacto.nombre}</p></div>}
             {mensajesPrivado.map(msg => {
               const esMio = msg.autorId === auth.currentUser?.uid;
               return (
