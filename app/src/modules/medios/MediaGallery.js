@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { db, auth } from '../../firebase';
+import { db } from '../../firebase';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, increment, addDoc } from 'firebase/firestore';
+import { auth } from '../../firebase';
 import MediaComments from './MediaComments';
 
 function MediaGallery() {
@@ -31,7 +32,7 @@ function MediaGallery() {
 
   const publicarEnFeed = async (item) => {
     setPublicando(item.id);
-    const usuario = auth.currentUser;
+    const currentUser = auth.currentUser;
     try {
       await addDoc(collection(db, 'posts'), {
         texto: `${item.tipo === 'foto' ? '📸' : '🎥'} Compartió ${item.tipo === 'foto' ? 'una foto' : 'un video'} del evento: ${item.evento}`,
@@ -40,6 +41,7 @@ function MediaGallery() {
         videoUrl: item.tipo === 'videoDirecto' ? item.url : null,
         autor: item.displayName,
         autorId: item.uid,
+        autorActual: currentUser.uid,
         fecha: new Date().toISOString(),
         aprobado: true,
         likes: 0,
@@ -104,7 +106,6 @@ function MediaGallery() {
 
   return (
     <div>
-      {/* Buscador */}
       <input
         type="text"
         placeholder="🔍 Buscar por evento o persona..."
@@ -113,16 +114,12 @@ function MediaGallery() {
         style={estilos.buscador}
       />
 
-      {/* Contador */}
       <p style={estilos.contador}>
         {idx + 1} de {visibles.length} {visibles.length === 1 ? 'elemento' : 'elementos'}
       </p>
 
-      {/* Tarjeta principal */}
       {item && (
         <div style={estilos.card}>
-
-          {/* Header */}
           <div style={estilos.cardHeader}>
             <div style={estilos.avatar}>
               {item.displayName?.charAt(0).toUpperCase() || '?'}
@@ -140,10 +137,7 @@ function MediaGallery() {
             </div>
           </div>
 
-          {/* Cuerpo */}
           <div style={estilos.cardBody}>
-
-            {/* Media */}
             <div style={estilos.mediaLado}>
               {item.tipo === 'video' && (
                 <iframe
@@ -202,13 +196,11 @@ function MediaGallery() {
               )}
             </div>
 
-            {/* Comentarios */}
             <div style={estilos.comentariosLado}>
               <MediaComments photoId={item.id} />
             </div>
           </div>
 
-          {/* Footer */}
           <div style={estilos.cardFooter}>
             <div style={estilos.stat}>
               ❤️ {(item.reacciones?.['❤️'] || 0) + (item.reacciones?.['🙌'] || 0) + (item.reacciones?.['🔥'] || 0)} reacciones
@@ -237,7 +229,6 @@ function MediaGallery() {
         </div>
       )}
 
-      {/* Miniaturas */}
       <div style={estilos.miniaturas}>
         {visibles.map((f, i) => (
           <div
