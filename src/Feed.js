@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from './firebase';
-import { collection, addDoc, getDocs, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import { collection, addDoc, getDocs, onSnapshot, orderBy, query, where, doc, deleteDoc } from 'firebase/firestore';
 import FeedComments from './FeedComments';
 
 function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias }) {
@@ -87,6 +87,16 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias }) {
     setLoading(false);
   };
 
+  const borrarPost = async (post) => {
+    if (!window.confirm('¿Seguro que quieres borrar esta publicación?')) return;
+    try {
+      await deleteDoc(doc(db, 'posts', post.id));
+      mostrarNotif('Publicación borrada', 'exito');
+    } catch (e) {
+      mostrarNotif('Error al borrar', 'error');
+    }
+  };
+
   const enviarChat = async () => {
     if (!nuevoMsg.trim()) return;
     try {
@@ -132,6 +142,10 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias }) {
       {label}
     </button>
   );
+
+  const puedeBorar = (post) => {
+    return usuario.uid === post.autorId || usuario.rol === 'admin';
+  };
 
   return (
     <div style={{minHeight:'100vh',background:'#f0f2f5',fontFamily:'system-ui'}}>
@@ -210,10 +224,18 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias }) {
                   </p>
                 </div>
                 {post.tipo === 'foto' && (
-                  <span style={{marginLeft:'auto',background:'#EEF1FF',color:'#1B2A6B',fontSize:'11px',padding:'3px 10px',borderRadius:20,fontWeight:600}}>📸 Medios</span>
+                  <span style={{background:'#EEF1FF',color:'#1B2A6B',fontSize:'11px',padding:'3px 10px',borderRadius:20,fontWeight:600}}>📸 Medios</span>
                 )}
                 {(post.tipo === 'video' || post.tipo === 'videoDirecto') && (
-                  <span style={{marginLeft:'auto',background:'#EEF1FF',color:'#1B2A6B',fontSize:'11px',padding:'3px 10px',borderRadius:20,fontWeight:600}}>🎥 Medios</span>
+                  <span style={{background:'#EEF1FF',color:'#1B2A6B',fontSize:'11px',padding:'3px 10px',borderRadius:20,fontWeight:600}}>🎥 Medios</span>
+                )}
+                {puedeBorar(post) && (
+                  <button
+                    onClick={() => borrarPost(post)}
+                    style={{marginLeft:'auto',background:'#fee2e2',border:'none',borderRadius:8,padding:'4px 12px',color:'#dc2626',fontSize:12,cursor:'pointer',fontWeight:600}}
+                  >
+                    🗑 Borrar
+                  </button>
                 )}
               </div>
               <p style={{margin:0,fontSize:'15px',lineHeight:'1.6',color:'#333'}}>{post.texto}</p>
