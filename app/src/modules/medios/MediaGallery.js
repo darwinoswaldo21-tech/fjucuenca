@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { db } from '../../firebase';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, increment, addDoc } from 'firebase/firestore';
-import { auth } from '../../firebase';
+import { db, auth } from '../../firebase';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, increment, addDoc, deleteDoc } from 'firebase/firestore';
 import MediaComments from './MediaComments';
 
-function MediaGallery() {
+function MediaGallery({ usuario }) {
   const [items, setItems] = useState([]);
   const [busqueda, setBusqueda] = useState('');
   const [indiceActual, setIndiceActual] = useState(0);
@@ -24,6 +23,22 @@ function MediaGallery() {
 
   const idx = Math.min(indiceActual, Math.max(0, visibles.length - 1));
   const item = visibles[idx];
+
+  const puedeBorrar = (item) => {
+    const currentUser = auth.currentUser;
+    if (!currentUser || !item) return false;
+    return currentUser.uid === item.uid || usuario?.rol === 'admin';
+  };
+
+  const borrarItem = async (item) => {
+    if (!window.confirm('¿Seguro que quieres borrar este contenido?')) return;
+    try {
+      await deleteDoc(doc(db, 'media', item.id));
+      setIndiceActual(0);
+    } catch (e) {
+      alert('Error al borrar');
+    }
+  };
 
   const reaccionar = async (itemId, tipo) => {
     const ref = doc(db, 'media', itemId);
@@ -135,6 +150,14 @@ function MediaGallery() {
             <div style={estilos.eventoBadge}>
               {getIcono(item.tipo)} {item.evento}
             </div>
+            {puedeBorrar(item) && (
+              <button
+                onClick={() => borrarItem(item)}
+                style={estilos.borrarBtn}
+              >
+                🗑 Borrar
+              </button>
+            )}
           </div>
 
           <div style={estilos.cardBody}>
@@ -272,6 +295,7 @@ const estilos = {
   cardNombre: { fontSize: 14, fontWeight: 700, color: '#1B2A6B' },
   cardFecha: { fontSize: 11, color: '#aaa' },
   eventoBadge: { background: '#EEF1FF', color: '#1B2A6B', fontSize: 11, padding: '4px 12px', borderRadius: 20, fontWeight: 600 },
+  borrarBtn: { background: '#fee2e2', border: 'none', borderRadius: 8, padding: '4px 12px', color: '#dc2626', fontSize: 12, cursor: 'pointer', fontWeight: 600 },
   cardBody: { display: 'flex' },
   mediaLado: { width: '55%', position: 'relative' },
   imagen: { width: '100%', height: 280, objectFit: 'cover', display: 'block' },
