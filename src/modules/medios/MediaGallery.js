@@ -8,6 +8,7 @@ function MediaGallery({ usuario }) {
   const [busqueda, setBusqueda] = useState('');
   const [indiceActual, setIndiceActual] = useState(0);
   const [publicando, setPublicando] = useState(null);
+  const [fotoAmpliada, setFotoAmpliada] = useState(null);
 
   useEffect(() => {
     const q = query(collection(db, 'media'), orderBy('createdAt', 'desc'));
@@ -121,6 +122,20 @@ function MediaGallery({ usuario }) {
 
   return (
     <div>
+      {/* Lightbox */}
+      {fotoAmpliada && (
+        <div
+          onClick={() => setFotoAmpliada(null)}
+          style={estilos.lightboxOverlay}
+        >
+          <div style={estilos.lightboxContenedor} onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setFotoAmpliada(null)} style={estilos.lightboxCerrar}>✕</button>
+            <img src={fotoAmpliada} alt="foto ampliada" style={estilos.lightboxImagen} />
+          </div>
+        </div>
+      )}
+
+      {/* Buscador */}
       <input
         type="text"
         placeholder="🔍 Buscar por evento o persona..."
@@ -151,10 +166,7 @@ function MediaGallery({ usuario }) {
               {getIcono(item.tipo)} {item.evento}
             </div>
             {puedeBorrar(item) && (
-              <button
-                onClick={() => borrarItem(item)}
-                style={estilos.borrarBtn}
-              >
+              <button onClick={() => borrarItem(item)} style={estilos.borrarBtn}>
                 🗑 Borrar
               </button>
             )}
@@ -173,45 +185,31 @@ function MediaGallery({ usuario }) {
                 />
               )}
               {item.tipo === 'videoDirecto' && (
-                <video
-                  src={item.url}
-                  controls
-                  style={estilos.video}
-                  playsInline
-                />
+                <video src={item.url} controls style={estilos.video} playsInline />
               )}
               {item.tipo === 'foto' && (
                 <>
                   <img
                     src={item.url}
                     alt={item.evento}
-                    style={estilos.imagen}
+                    style={{...estilos.imagen, cursor: 'zoom-in'}}
+                    onClick={() => setFotoAmpliada(item.url)}
                     onError={(e) => { e.target.style.display = 'none'; }}
                   />
                   <div style={estilos.reaccionesOverlay}>
                     {['❤️', '🙌', '🔥'].map((emoji) => (
-                      <button
-                        key={emoji}
-                        onClick={() => reaccionar(item.id, emoji)}
-                        style={estilos.reaccionBtn}
-                      >
+                      <button key={emoji} onClick={() => reaccionar(item.id, emoji)} style={estilos.reaccionBtn}>
                         {emoji} {item.reacciones?.[emoji] || 0}
                       </button>
                     ))}
                   </div>
-                  <button onClick={() => descargar(item)} style={estilos.descargarBtn}>
-                    ⬇ Descargar
-                  </button>
+                  <button onClick={() => descargar(item)} style={estilos.descargarBtn}>⬇ Descargar</button>
                 </>
               )}
               {(item.tipo === 'video' || item.tipo === 'videoDirecto') && (
                 <div style={estilos.reaccionesVideo}>
                   {['❤️', '🙌', '🔥'].map((emoji) => (
-                    <button
-                      key={emoji}
-                      onClick={() => reaccionar(item.id, emoji)}
-                      style={estilos.reaccionBtnVideo}
-                    >
+                    <button key={emoji} onClick={() => reaccionar(item.id, emoji)} style={estilos.reaccionBtnVideo}>
                       {emoji} {item.reacciones?.[emoji] || 0}
                     </button>
                   ))}
@@ -237,16 +235,8 @@ function MediaGallery({ usuario }) {
               {publicando === item.id ? 'Publicando...' : '📢 Publicar en Feed'}
             </button>
             <div style={estilos.navBtns}>
-              <button
-                onClick={() => setIndiceActual(Math.max(0, idx - 1))}
-                disabled={idx === 0}
-                style={estilos.navBtn}
-              >← Anterior</button>
-              <button
-                onClick={() => setIndiceActual(Math.min(visibles.length - 1, idx + 1))}
-                disabled={idx === visibles.length - 1}
-                style={estilos.navBtn}
-              >Siguiente →</button>
+              <button onClick={() => setIndiceActual(Math.max(0, idx - 1))} disabled={idx === 0} style={estilos.navBtn}>← Anterior</button>
+              <button onClick={() => setIndiceActual(Math.min(visibles.length - 1, idx + 1))} disabled={idx === visibles.length - 1} style={estilos.navBtn}>Siguiente →</button>
             </div>
           </div>
         </div>
@@ -257,22 +247,12 @@ function MediaGallery({ usuario }) {
           <div
             key={f.id}
             onClick={() => setIndiceActual(i)}
-            style={{
-              ...estilos.miniatura,
-              border: i === idx ? '3px solid #1B2A6B' : '2px solid transparent'
-            }}
+            style={{ ...estilos.miniatura, border: i === idx ? '3px solid #1B2A6B' : '2px solid transparent' }}
           >
             {getThumbnail(f) ? (
-              <img
-                src={getThumbnail(f)}
-                alt={f.evento}
-                style={estilos.miniaturaImg}
-                onError={(e) => { e.target.style.display = 'none'; }}
-              />
+              <img src={getThumbnail(f)} alt={f.evento} style={estilos.miniaturaImg} onError={(e) => { e.target.style.display = 'none'; }} />
             ) : (
-              <div style={estilos.miniaturaPlaceholder}>
-                {f.tipo === 'videoDirecto' ? '🎥' : '▶️'}
-              </div>
+              <div style={estilos.miniaturaPlaceholder}>{f.tipo === 'videoDirecto' ? '🎥' : '▶️'}</div>
             )}
             {(f.tipo === 'video' || f.tipo === 'videoDirecto') && (
               <div style={estilos.videoIcono}>▶</div>
@@ -317,6 +297,10 @@ const estilos = {
   miniaturaImg: { width: '100%', height: '100%', objectFit: 'cover' },
   miniaturaPlaceholder: { width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, background: '#EEF1FF' },
   videoIcono: { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'rgba(0,0,0,0.6)', color: 'white', borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 },
+  lightboxOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.92)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 },
+  lightboxContenedor: { position: 'relative', maxWidth: '95vw', maxHeight: '95vh' },
+  lightboxImagen: { maxWidth: '95vw', maxHeight: '90vh', borderRadius: 12, objectFit: 'contain', display: 'block' },
+  lightboxCerrar: { position: 'absolute', top: -16, right: -16, background: 'white', border: 'none', borderRadius: '50%', width: 36, height: 36, fontSize: 16, cursor: 'pointer', fontWeight: 700, zIndex: 10 },
 };
 
 export default MediaGallery;
