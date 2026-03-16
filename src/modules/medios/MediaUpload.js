@@ -12,7 +12,7 @@ function extraerIdYoutube(url) {
   return match ? match[1] : null;
 }
 
-function MediaUpload({ onUploaded }) {
+function MediaUpload({ onUploaded, usuario }) {
   const [tipo, setTipo] = useState('foto');
   const [archivo, setArchivo] = useState(null);
   const [archivoVideo, setArchivoVideo] = useState(null);
@@ -21,6 +21,13 @@ function MediaUpload({ onUploaded }) {
   const [progreso, setProgreso] = useState(0);
   const [subiendo, setSubiendo] = useState(false);
   const [error, setError] = useState('');
+
+  const getNombre = () => {
+    return auth.currentUser?.displayName ||
+      usuario?.nombre ||
+      auth.currentUser?.email?.split('@')[0] ||
+      'Usuario';
+  };
 
   const handleSubirFoto = async () => {
     if (!archivo || !evento.trim()) {
@@ -46,14 +53,13 @@ function MediaUpload({ onUploaded }) {
 
     xhr.onload = async () => {
       const data = JSON.parse(xhr.responseText);
-      const usuario = auth.currentUser;
       await addDoc(collection(db, 'media'), {
         tipo: 'foto',
         url: data.secure_url,
         evento: evento.trim(),
-        uid: usuario.uid,
-        displayName: usuario.displayName || 'Usuario',
-        photoURL: usuario.photoURL || null,
+        uid: auth.currentUser.uid,
+        displayName: getNombre(),
+        photoURL: auth.currentUser.photoURL || null,
         createdAt: serverTimestamp(),
       });
       setArchivo(null);
@@ -110,15 +116,14 @@ function MediaUpload({ onUploaded }) {
 
     xhr.onload = async () => {
       const data = JSON.parse(xhr.responseText);
-      const usuario = auth.currentUser;
       await addDoc(collection(db, 'media'), {
         tipo: 'videoDirecto',
         url: data.secure_url,
         thumbnail: data.secure_url.replace('/upload/', '/upload/so_0/').replace(/\.\w+$/, '.jpg'),
         evento: evento.trim(),
-        uid: usuario.uid,
-        displayName: usuario.displayName || 'Usuario',
-        photoURL: usuario.photoURL || null,
+        uid: auth.currentUser.uid,
+        displayName: getNombre(),
+        photoURL: auth.currentUser.photoURL || null,
         createdAt: serverTimestamp(),
       });
       setArchivoVideo(null);
@@ -149,16 +154,15 @@ function MediaUpload({ onUploaded }) {
     }
     setError('');
     setSubiendo(true);
-    const usuario = auth.currentUser;
     await addDoc(collection(db, 'media'), {
       tipo: 'video',
       videoId,
       urlYoutube: urlYoutube.trim(),
       thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
       evento: evento.trim(),
-      uid: usuario.uid,
-      displayName: usuario.displayName || 'Usuario',
-      photoURL: usuario.photoURL || null,
+      uid: auth.currentUser.uid,
+      displayName: getNombre(),
+      photoURL: auth.currentUser.photoURL || null,
       createdAt: serverTimestamp(),
     });
     setUrlYoutube('');

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth, db } from './firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 
 const S = {
@@ -37,6 +37,7 @@ function Register({ onBack }) {
     setLoading(true);
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(result.user, { displayName: nombre });
       await setDoc(doc(db, 'usuarios', result.user.uid), {
         nombre, email, rol:'miembro', aprobado:false,
         fechaRegistro: new Date().toISOString()
@@ -70,7 +71,7 @@ function Register({ onBack }) {
         <div style={{position:'relative',marginBottom:'8px'}}>
           <input type={verPass?'text':'password'} placeholder="Minimo 6 caracteres" value={password} onChange={(e)=>setPassword(e.target.value)} style={{...S.input,paddingRight:'48px'}} />
           <button onClick={()=>setVerPass(!verPass)} style={{position:'absolute',right:'12px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'18px'}}>
-            {verPass?'í¹ˆ':'í±ï¸'}
+            {verPass?'ğŸ™ˆ':'ğŸ‘ï¸'}
           </button>
         </div>
         {password.length>0 && (
