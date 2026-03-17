@@ -7,6 +7,8 @@ function Admin({ usuario, onLogout, onFeed }) {
   const [usuarios, setUsuarios] = useState([]);
   const [tab, setTab] = useState('posts');
   const [notif, setNotif] = useState(null);
+  const [reparando, setReparando] = useState(false);
+  const [reporteReparacion, setReporteReparacion] = useState(null);
 
   const mostrarNotif = (msg, tipo) => {
     setNotif({msg, tipo});
@@ -53,6 +55,72 @@ function Admin({ usuario, onLogout, onFeed }) {
     cargarUsuarios();
   };
 
+  // SCRIPT: corregir posts y comentarios con autor "Usuario"
+  const repararNombres = async () => {
+    if (!window.confirm('¿Corregir todos los posts y comentarios que dicen "Usuario"? Esto buscará el nombre real de cada autor en Firestore.')) return;
+    setReparando(true);
+    setReporteReparacion(null);
+
+    let postsCorregidos = 0;
+    let comentariosCorregidos = 0;
+    let errores = 0;
+
+    try {
+      // Cargar todos los usuarios para tener el mapa uid -> nombre
+      const usuariosSnap = await getDocs(collection(db, 'usuarios'));
+      const mapaUsuarios = {};
+      usuariosSnap.docs.forEach(d => {
+        const data = d.data();
+        if (data.nombre && data.nombre.trim() !== '') {
+          mapaUsuarios[d.id] = data.nombre;
+        }
+      });
+
+      // Corregir posts con autor "Usuario"
+      const postsSnap = await getDocs(collection(db, 'posts'));
+      for (const postDoc of postsSnap.docs) {
+        const post = postDoc.data();
+
+        // Corregir autor del post
+        if ((!post.autor || post.autor.trim() === '' || post.autor === 'Usuario') && post.autorId) {
+          const nombreReal = mapaUsuarios[post.autorId];
+          if (nombreReal) {
+            try {
+              await updateDoc(doc(db, 'posts', postDoc.id), { autor: nombreReal });
+              postsCorregidos++;
+            } catch (e) {
+              errores++;
+            }
+          }
+        }
+
+        // Corregir comentarios dentro de cada post
+        const commentsSnap = await getDocs(collection(db, 'posts', postDoc.id, 'comments'));
+        for (const commentDoc of commentsSnap.docs) {
+          const comment = commentDoc.data();
+          if ((!comment.displayName || comment.displayName.trim() === '' || comment.displayName === 'Usuario') && comment.uid) {
+            const nombreReal = mapaUsuarios[comment.uid];
+            if (nombreReal) {
+              try {
+                await updateDoc(doc(db, 'posts', postDoc.id, 'comments', commentDoc.id), { displayName: nombreReal });
+                comentariosCorregidos++;
+              } catch (e) {
+                errores++;
+              }
+            }
+          }
+        }
+      }
+
+      setReporteReparacion({ postsCorregidos, comentariosCorregidos, errores });
+      mostrarNotif(`Reparación completa: ${postsCorregidos} posts y ${comentariosCorregidos} comentarios corregidos`, 'exito');
+      cargarPosts();
+    } catch (e) {
+      mostrarNotif('Error en la reparación: ' + e.message, 'error');
+    }
+    setReparando(false);
+  };
+
   return (
     <div style={{minHeight:'100vh',background:'#f0f2f5',fontFamily:'system-ui'}}>
       {notif && (
@@ -75,12 +143,15 @@ function Admin({ usuario, onLogout, onFeed }) {
       </div>
 
       <div style={{maxWidth:'800px',margin:'24px auto',padding:'0 16px'}}>
-        <div style={{display:'flex',gap:'8px',marginBottom:'20px'}}>
+        <div style={{display:'flex',gap:'8px',marginBottom:'20px',flexWrap:'wrap'}}>
           <button onClick={()=>setTab('posts')} style={{padding:'10px 24px',background:tab==='posts'?'#1B2A6B':'white',color:tab==='posts'?'white':'#1B2A6B',border:'2px solid #1B2A6B',borderRadius:'8px',cursor:'pointer',fontWeight:'600'}}>
             Posts ({posts.filter(p=>!p.aprobado).length} pendientes)
           </button>
           <button onClick={()=>setTab('usuarios')} style={{padding:'10px 24px',background:tab==='usuarios'?'#1B2A6B':'white',color:tab==='usuarios'?'white':'#1B2A6B',border:'2px solid #1B2A6B',borderRadius:'8px',cursor:'pointer',fontWeight:'600'}}>
             Usuarios ({usuarios.filter(u=>!u.aprobado).length} pendientes)
+          </button>
+          <button onClick={()=>setTab('reparar')} style={{padding:'10px 24px',background:tab==='reparar'?'#B8860B':'white',color:tab==='reparar'?'white':'#B8860B',border:'2px solid #B8860B',borderRadius:'8px',cursor:'pointer',fontWeight:'600'}}>
+            🔧 Reparar nombres
           </button>
         </div>
 
@@ -138,6 +209,34 @@ function Admin({ usuario, onLogout, onFeed }) {
             </div>
           </div>
         ))}
+
+        {tab==='reparar' && (
+          <div style={{background:'white',borderRadius:'16px',padding:'32px',boxShadow:'0 2px 8px rgba(0,0,0,0.08)',textAlign:'center'}}>
+            <p style={{fontSize:'48px',margin:'0 0 12px'}}>🔧</p>
+            <h3 style={{color:'#1B2A6B',margin:'0 0 8px'}}>Reparar nombres en posts y comentarios</h3>
+            <p style={{color:'#666',fontSize:'14px',margin:'0 0 24px',lineHeight:'1.6'}}>
+              Este script busca todos los posts y comentarios que tienen autor <strong>"Usuario"</strong> y los corrige automáticamente usando el nombre real guardado en Firestore.
+            </p>
+            <button
+              onClick={repararNombres}
+              disabled={reparando}
+              style={{padding:'14px 32px',background:reparando?'#aaa':'#B8860B',color:'white',border:'none',borderRadius:'12px',fontSize:'16px',cursor:reparando?'not-allowed':'pointer',fontWeight:'700'}}
+            >
+              {reparando ? '⏳ Reparando...' : '🔧 Iniciar reparación'}
+            </button>
+
+            {reporteReparacion && (
+              <div style={{marginTop:'24px',background:'#f0f7ff',borderRadius:'12px',padding:'20px'}}>
+                <p style={{margin:'0 0 8px',fontWeight:'700',color:'#1B2A6B'}}>✅ Reparación completada</p>
+                <p style={{margin:'0 0 4px',color:'#333',fontSize:'14px'}}>📝 Posts corregidos: <strong>{reporteReparacion.postsCorregidos}</strong></p>
+                <p style={{margin:'0 0 4px',color:'#333',fontSize:'14px'}}>💬 Comentarios corregidos: <strong>{reporteReparacion.comentariosCorregidos}</strong></p>
+                {reporteReparacion.errores > 0 && (
+                  <p style={{margin:'0',color:'#e53e3e',fontSize:'14px'}}>⚠️ Errores: <strong>{reporteReparacion.errores}</strong></p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
