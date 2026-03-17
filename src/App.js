@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import Login from './Login';
 import Register from './Register';
 import Feed from './Feed';
@@ -25,7 +25,24 @@ function App() {
         const snap = await getDoc(doc(db, 'usuarios', user.uid));
         if (snap.exists()) {
           const data = snap.data();
-          setUsuario({...data, uid: user.uid});
+
+          // FIX: si el nombre está vacío usar displayName de Auth o email
+          const nombreFinal = data.nombre && data.nombre.trim() !== ''
+            ? data.nombre
+            : user.displayName || user.email?.split('@')[0] || 'Usuario';
+
+          // Auto-corregir nombre vacío en Firestore
+          if (!data.nombre || data.nombre.trim() === '') {
+            try {
+              await updateDoc(doc(db, 'usuarios', user.uid), {
+                nombre: nombreFinal
+              });
+            } catch (e) {
+              console.log('No se pudo actualizar nombre:', e);
+            }
+          }
+
+          setUsuario({ ...data, uid: user.uid, nombre: nombreFinal });
           setPantalla(prev => {
             if (prev === 'login' || prev === 'register') {
               return data.rol === 'admin' ? 'admin' : 'feed';

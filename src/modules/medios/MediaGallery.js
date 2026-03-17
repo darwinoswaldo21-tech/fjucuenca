@@ -51,8 +51,8 @@ function MediaGallery({ usuario }) {
     const currentUser = auth.currentUser;
     try {
       await addDoc(collection(db, 'posts'), {
-        texto: `${item.tipo === 'foto' ? '📸' : '🎥'} Compartió ${item.tipo === 'foto' ? 'una foto' : 'un video'} del evento: ${item.evento}`,
-        imagen: item.tipo === 'foto' ? item.url : item.thumbnail || null,
+        texto: `${item.tipo === 'foto' || !item.tipo ? '📸' : '🎥'} Compartió ${item.tipo === 'foto' || !item.tipo ? 'una foto' : 'un video'} del evento: ${item.evento}`,
+        imagen: item.tipo === 'foto' || !item.tipo ? item.url : item.thumbnail || null,
         videoId: item.tipo === 'video' ? item.videoId : null,
         videoUrl: item.tipo === 'videoDirecto' ? item.url : null,
         autor: item.displayName,
@@ -61,7 +61,7 @@ function MediaGallery({ usuario }) {
         fecha: new Date().toISOString(),
         aprobado: true,
         likes: 0,
-        tipo: item.tipo,
+        tipo: item.tipo || 'foto',
       });
       alert('✅ Publicado en el Feed!');
     } catch (e) {
@@ -124,10 +124,7 @@ function MediaGallery({ usuario }) {
     <div>
       {/* Lightbox */}
       {fotoAmpliada && (
-        <div
-          onClick={() => setFotoAmpliada(null)}
-          style={estilos.lightboxOverlay}
-        >
+        <div onClick={() => setFotoAmpliada(null)} style={estilos.lightboxOverlay}>
           <div style={estilos.lightboxContenedor} onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setFotoAmpliada(null)} style={estilos.lightboxCerrar}>✕</button>
             <img src={fotoAmpliada} alt="foto ampliada" style={estilos.lightboxImagen} />
@@ -187,12 +184,12 @@ function MediaGallery({ usuario }) {
               {item.tipo === 'videoDirecto' && (
                 <video src={item.url} controls style={estilos.video} playsInline />
               )}
-              {item.tipo === 'foto' && (
+              {(item.tipo === 'foto' || !item.tipo) && (
                 <>
                   <img
                     src={item.url}
                     alt={item.evento}
-                    style={{...estilos.imagen, cursor: 'zoom-in'}}
+                    style={{ ...estilos.imagen, cursor: 'zoom-in' }}
                     onClick={() => setFotoAmpliada(item.url)}
                     onError={(e) => { e.target.style.display = 'none'; }}
                   />
