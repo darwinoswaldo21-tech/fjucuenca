@@ -1,0 +1,274 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;600&display=swap');
+
+.fju-feed {
+  --bg0: #0b1020;
+  --bg1: #0f1b3a;
+  --card: rgba(255, 255, 255, 0.92);
+  --card2: rgba(255, 255, 255, 0.78);
+  --ink: #0c1222;
+  --muted: rgba(12, 18, 34, 0.64);
+  --brand: #1b2a6b;
+  --brand2: #3d5a99;
+  --accent: #f5a623;
+  --danger: #e53e3e;
+  --ok: #0f766e;
+  --ring: rgba(245, 166, 35, 0.35);
+
+  min-height: 100vh;
+  color: var(--ink);
+  font-family: "Space Grotesk", "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background:
+    radial-gradient(1200px 800px at 20% 10%, rgba(245, 166, 35, 0.18), transparent 55%),
+    radial-gradient(900px 700px at 80% 0%, rgba(61, 90, 153, 0.32), transparent 60%),
+    radial-gradient(900px 700px at 50% 100%, rgba(27, 42, 107, 0.35), transparent 60%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+}
+
+.fju-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 10px 14px;
+  backdrop-filter: blur(14px);
+  background: rgba(15, 27, 58, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fju-topbarInner {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fju-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 200px;
+}
+
+.fju-brand img {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.fju-brandTitle {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  line-height: 1.1;
+}
+
+.fju-brandSub {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 12px;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.fju-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.fju-chip {
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-size: 12.5px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.fju-chip:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.fju-chip:active {
+  transform: translateY(0);
+}
+
+.fju-chipActive {
+  border-color: rgba(245, 166, 35, 0.40);
+  box-shadow: 0 0 0 3px var(--ring);
+  background: rgba(245, 166, 35, 0.12);
+}
+
+.fju-chipPrimary {
+  border-color: rgba(245, 166, 35, 0.45);
+  background: rgba(245, 166, 35, 0.14);
+}
+
+.fju-chipAdmin {
+  border-color: rgba(245, 166, 35, 0.55);
+  background: linear-gradient(135deg, rgba(245, 166, 35, 0.25), rgba(245, 166, 35, 0.10));
+}
+
+.fju-hello {
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 12.5px;
+  padding: 0 6px;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.fju-page {
+  max-width: 720px;
+  margin: 14px auto 36px;
+  padding: 0 16px;
+}
+
+.fju-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.fju-card {
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow:
+    0 18px 54px rgba(0, 0, 0, 0.18),
+    0 2px 10px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transform: translateZ(0);
+  animation: fjuIn 420ms ease both;
+}
+
+.fju-cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(12, 18, 34, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.70));
+}
+
+.fju-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--brand), var(--brand2));
+  color: white;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  box-shadow: 0 14px 30px rgba(27, 42, 107, 0.25);
+}
+
+.fju-cardBody {
+  padding: 14px 16px 16px;
+}
+
+.fju-textarea {
+  width: 100%;
+  padding: 10px 11px;
+  border-radius: 12px;
+  border: 1px solid rgba(12, 18, 34, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+  outline: none;
+  font-size: 14px;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  resize: none;
+  min-height: 72px;
+  transition: box-shadow 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+
+.fju-textarea:focus {
+  border-color: rgba(245, 166, 35, 0.55);
+  box-shadow: 0 0 0 4px var(--ring);
+}
+
+.fju-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.fju-hint {
+  color: var(--muted);
+  font-size: 13px;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.fju-cta {
+  padding: 9px 14px;
+  border-radius: 12px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, var(--brand), var(--brand2));
+  box-shadow: 0 18px 40px rgba(27, 42, 107, 0.25);
+  transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+}
+
+.fju-cta:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 22px 50px rgba(27, 42, 107, 0.30);
+}
+
+.fju-cta:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
+  box-shadow: none;
+}
+
+.fju-toast {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  min-width: 300px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+}
+
+.fju-toastOk {
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.92), rgba(27, 42, 107, 0.72));
+}
+
+.fju-toastErr {
+  background: linear-gradient(135deg, rgba(229, 62, 62, 0.92), rgba(15, 27, 58, 0.72));
+}
+
+@keyframes fjuIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 720px) {
+  .fju-topbarInner { gap: 8px; }
+  .fju-brand { min-width: 0; }
+  .fju-brandSub { display: none; }
+  .fju-hello { display: none; }
+}

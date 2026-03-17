@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from './firebase';
 import { collection, addDoc, getDocs, onSnapshot, orderBy, query, where, doc, deleteDoc } from 'firebase/firestore';
 import FeedComments from './FeedComments';
+import './FeedPro.css';
 
-function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias }) {
+function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onChat, onChatPrivado }) {
   const [posts, setPosts] = useState([]);
   const [nuevo, setNuevo] = useState('');
   const [loading, setLoading] = useState(false);
@@ -16,19 +17,25 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias }) {
   const [nuevoMsg, setNuevoMsg] = useState('');
   const bottomRef = useRef(null);
 
+  // Si existen handlers, el navbar navega a pantallas separadas y no necesitamos listeners inline.
+  const inlineChat = !onChat;
+  const inlinePrivado = !onChatPrivado;
+
   const mostrarNotif = (msg, tipo) => {
     setNotif({msg, tipo});
     setTimeout(() => setNotif(null), 4000);
   };
 
-  const cargarUsuarios = async () => {
-    const snap = await getDocs(collection(db, 'usuarios'));
-    setUsuarios(snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.id !== auth.currentUser.uid));
-  };
-
   useEffect(() => {
-    cargarUsuarios();
-  }, []);
+    if (!inlinePrivado) return;
+
+    const cargar = async () => {
+      const snap = await getDocs(collection(db, 'usuarios'));
+      setUsuarios(snap.docs.map(d => ({id: d.id, ...d.data()})).filter(u => u.id !== auth.currentUser.uid));
+    };
+
+    cargar();
+  }, [inlinePrivado]);
 
   useEffect(() => {
     const q = query(collection(db, 'posts'), orderBy('fecha', 'desc'));
@@ -39,22 +46,23 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias }) {
   }, []);
 
   useEffect(() => {
+    if (!inlineChat) return;
     const q = query(collection(db, 'chat'), orderBy('fecha', 'asc'));
     const unsub = onSnapshot(q, (snap) => {
       setMensajesChat(snap.docs.map(d => ({id: d.id, ...d.data()})));
     });
     return () => unsub();
-  }, []);
+  }, [inlineChat]);
 
   useEffect(() => {
-    if (!contacto) return;
+    if (!inlinePrivado || !contacto) return;
     const chatId = [auth.currentUser.uid, contacto.id].sort().join('_');
     const q = query(collection(db, 'chatprivado'), where('chatId', '==', chatId), orderBy('fecha', 'asc'));
     const unsub = onSnapshot(q, (snap) => {
       setMensajesPrivado(snap.docs.map(d => ({id: d.id, ...d.data()})));
     });
     return () => unsub();
-  }, [contacto]);
+  }, [contacto, inlinePrivado]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({behavior:'smooth'});
@@ -138,7 +146,11 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias }) {
   };
 
   const navBtn = (v, label) => (
-    <button onClick={()=>setVista(v)} style={{background:vista===v?'rgba(255,255,255,0.4)':'rgba(255,255,255,0.2)',color:'white',border:'none',padding:'8px 16px',borderRadius:'8px',cursor:'pointer',fontSize:'14px',fontWeight:'600'}}>
+    <button
+      onClick={() => setVista(v)}
+      className={`fju-chip ${vista === v ? 'fju-chipActive' : ''}`}
+      type="button"
+    >
       {label}
     </button>
   );
@@ -148,43 +160,60 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias }) {
   };
 
   return (
-    <div style={{minHeight:'100vh',background:'#f0f2f5',fontFamily:'system-ui'}}>
+    <div className="fju-feed">
       {notif && (
-        <div style={{position:'fixed',top:'24px',left:'50%',transform:'translateX(-50%)',background:notif.tipo==='exito'?'#1B2A6B':'#e53e3e',color:'white',padding:'16px 32px',borderRadius:'12px',boxShadow:'0 8px 32px rgba(0,0,0,0.25)',fontSize:'15px',fontWeight:'500',zIndex:1000,textAlign:'center',minWidth:'300px'}}>
+        <div className={`fju-toast ${notif.tipo === 'exito' ? 'fju-toastOk' : 'fju-toastErr'}`}>
           {notif.tipo==='exito'?'OK: ':'ERROR: '}{notif.msg}
         </div>
       )}
 
       {/* Navbar */}
-      <div style={{background:'#1B2A6B',padding:'16px 24px',display:'flex',alignItems:'center',justifyContent:'space-between',boxShadow:'0 2px 8px rgba(0,0,0,0.2)'}}>
-        <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
-          <img src="/fondo1.jpg" alt="FJU" style={{width:'40px',height:'40px',borderRadius:'50%',objectFit:'cover',border:'2px solid white'}} />
-          <span style={{color:'white',fontWeight:'700',fontSize:'18px'}}>FJU Cuenca</span>
-        </div>
-        <div style={{display:'flex',alignItems:'center',gap:'8px',flexWrap:'wrap'}}>
+      <div className="fju-topbar">
+        <div className="fju-topbarInner">
+          <div className="fju-brand">
+            <img src="/fondo1.jpg" alt="FJU" />
+            <div>
+              <div className="fju-brandTitle">FJU Cuenca</div>
+              <div className="fju-brandSub">Feed de la comunidad</div>
+            </div>
+          </div>
+          <div className="fju-nav">
           {navBtn('feed', 'Inicio')}
-          {navBtn('chat', 'Chat')}
-          {navBtn('privado', 'Privado')}
-          <button onClick={onHelp} style={{background:'rgba(255,255,255,0.2)',color:'white',border:'none',padding:'8px 16px',borderRadius:'8px',cursor:'pointer',fontSize:'14px',fontWeight:'600'}}>
+          {onChat ? (
+            <button onClick={onChat} className="fju-chip" type="button">
+              Chat
+            </button>
+          ) : (
+            navBtn('chat', 'Chat')
+          )}
+          {onChatPrivado ? (
+            <button onClick={onChatPrivado} className="fju-chip" type="button">
+              Privado
+            </button>
+          ) : (
+            navBtn('privado', 'Privado')
+          )}
+          <button onClick={onHelp} className="fju-chip fju-chipPrimary" type="button">
             🙏 Help
           </button>
-          <button onClick={onMedias} style={{background:'rgba(255,255,255,0.2)',color:'white',border:'none',padding:'8px 16px',borderRadius:'8px',cursor:'pointer',fontSize:'14px',fontWeight:'600'}}>
+          <button onClick={onMedias} className="fju-chip fju-chipPrimary" type="button">
             📸 Medios
           </button>
           {onAdmin && (
-            <button onClick={onAdmin} style={{background:'#B8860B',color:'white',border:'none',padding:'8px 16px',borderRadius:'8px',cursor:'pointer',fontSize:'14px',fontWeight:'600'}}>Admin</button>
+            <button onClick={onAdmin} className="fju-chip fju-chipAdmin" type="button">Admin</button>
           )}
-          <span style={{color:'rgba(255,255,255,0.8)',fontSize:'14px'}}>Hola, {usuario.nombre}</span>
-          <button onClick={onLogout} style={{background:'rgba(255,255,255,0.2)',color:'white',border:'none',padding:'8px 16px',borderRadius:'8px',cursor:'pointer',fontSize:'14px'}}>Salir</button>
+          <span className="fju-hello">Hola, {usuario.nombre}</span>
+          <button onClick={onLogout} className="fju-chip" type="button">Salir</button>
+        </div>
         </div>
       </div>
 
       {vista === 'feed' && (
-        <div style={{maxWidth:'600px',margin:'24px auto',padding:'0 16px'}}>
+        <div className="fju-page">
           {/* Crear post */}
-          <div style={{background:'white',borderRadius:'16px',padding:'20px',marginBottom:'20px',boxShadow:'0 2px 8px rgba(0,0,0,0.08)'}}>
+          <div className="fju-card" style={{padding:'16px',marginBottom:'14px'}}>
             <div style={{display:'flex',gap:'12px',alignItems:'flex-start'}}>
-              <div style={{width:'40px',height:'40px',borderRadius:'50%',background:'linear-gradient(135deg,#1B2A6B,#3d5a99)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'700',fontSize:'16px',flexShrink:0}}>
+              <div className="fju-avatar" style={{flexShrink:0}}>
                 {usuario.nombre.charAt(0).toUpperCase()}
               </div>
               <div style={{flex:1}}>
@@ -192,11 +221,11 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias }) {
                   placeholder="Comparte algo con la comunidad FJU..."
                   value={nuevo}
                   onChange={(e)=>setNuevo(e.target.value)}
-                  style={{width:'100%',padding:'12px',borderRadius:'10px',border:'2px solid #eee',fontSize:'15px',outline:'none',resize:'none',minHeight:'80px',boxSizing:'border-box',fontFamily:'system-ui'}}
+                  className="fju-textarea"
                 />
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:'8px'}}>
-                  <span style={{color:'#aaa',fontSize:'13px'}}>Comparte con amor ✝️</span>
-                  <button onClick={publicar} disabled={loading} style={{padding:'10px 24px',background:'linear-gradient(135deg,#1B2A6B,#3d5a99)',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',cursor:loading?'not-allowed':'pointer',fontWeight:'600'}}>
+                  <span style={{color:'#666',fontSize:'12.5px'}}>Comparte con amor ✝️</span>
+                  <button onClick={publicar} disabled={loading} className="fju-cta" type="button">
                     {loading?'Enviando...':'Publicar'}
                   </button>
                 </div>
@@ -212,9 +241,9 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias }) {
             </div>
           )}
           {posts.filter(p=>p.aprobado).map(post => (
-            <div key={post.id} style={{background:'white',borderRadius:'16px',padding:'20px',marginBottom:'16px',boxShadow:'0 2px 8px rgba(0,0,0,0.08)'}}>
+            <div key={post.id} className="fju-card" style={{padding:'16px',marginBottom:'12px'}}>
               <div style={{display:'flex',alignItems:'center',gap:'12px',marginBottom:'12px'}}>
-                <div style={{width:'40px',height:'40px',borderRadius:'50%',background:'linear-gradient(135deg,#1B2A6B,#3d5a99)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'700',fontSize:'16px'}}>
+                <div className="fju-avatar" style={{width:'40px',height:'40px',borderRadius:'50%'}}>
                   {post.autor.charAt(0).toUpperCase()}
                 </div>
                 <div>

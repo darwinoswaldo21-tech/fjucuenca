@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, limit, query, setDoc, updateDoc, where } from 'firebase/firestore';
 import Login from './Login';
 import Register from './Register';
 import Feed from './Feed';
@@ -21,40 +21,102 @@ function App() {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const snap = await getDoc(doc(db, 'usuarios', user.uid));
-        if (snap.exists()) {
-          const data = snap.data();
+      try {
+        if (user) {
+          const userRef = doc(db, 'usuarios', user.uid);
+          let snap = await getDoc(userRef);
+          let data = null;
 
-          // FIX: si el nombre está vacío usar displayName de Auth o email
-          const nombreFinal = data.nombre && data.nombre.trim() !== ''
-            ? data.nombre
-            : user.displayName || user.email?.split('@')[0] || 'Usuario';
+          if (!snap.exists()) {
+            // Caso comun: el doc existe pero con ID incorrecto (por ejemplo el nombre). Intentamos migrar por email.
+            const email = user.email || null;
+            const displayName = user.displayName || null;
 
-          // Auto-corregir nombre vacío en Firestore
-          if (!data.nombre || data.nombre.trim() === '') {
-            try {
-              await updateDoc(doc(db, 'usuarios', user.uid), {
-                nombre: nombreFinal
-              });
-            } catch (e) {
-              console.log('No se pudo actualizar nombre:', e);
+            const tryLegacyMatch = async (field, value) => {
+              if (!value) return null;
+              const q = query(collection(db, 'usuarios'), where(field, '==', value), limit(1));
+              const qs = await getDocs(q);
+              if (qs.empty) return null;
+              return qs.docs[0];
+            };
+
+            // 1) Por email (si existe en Firestore)
+            let legacyDoc = await tryLegacyMatch('email', email);
+
+            // 2) Fallback por nombre (muchos docs viejos no tienen email)
+            if (!legacyDoc) legacyDoc = await tryLegacyMatch('nombre', displayName);
+
+            // 3) Fallback final: nombre basado en el correo
+            if (!legacyDoc && email) legacyDoc = await tryLegacyMatch('nombre', email.split('@')[0]);
+
+            if (legacyDoc) {
+              data = legacyDoc.data();
+
+              // Creamos/normalizamos el doc por UID sin borrar el legacy (evita perdida de datos).
+              await setDoc(userRef, { ...data, ...(email ? { email } : {}) }, { merge: true });
+              snap = await getDoc(userRef);
             }
           }
 
-          setUsuario({ ...data, uid: user.uid, nombre: nombreFinal });
-          setPantalla(prev => {
-            if (prev === 'login' || prev === 'register') {
-              return data.rol === 'admin' ? 'admin' : 'feed';
+          if (snap.exists()) {
+            data = snap.data();
+
+            // DEBUG temporal
+            console.log('Usuario Firestore:', data);
+            console.log('aprobado:', data.aprobado);
+            console.log('rol:', data.rol);
+
+            // Verificar aprobado
+            if (data.aprobado === false) {
+              setUsuario(null);
+              setPantalla('pendiente');
+              return;
             }
-            return prev;
-          });
+
+            const nombreFinal = data.nombre && data.nombre.trim() !== ''
+              ? data.nombre
+              : user.displayName || user.email?.split('@')[0] || 'Usuario';
+
+            if (!data.nombre || data.nombre.trim() === '') {
+              try {
+                await updateDoc(doc(db, 'usuarios', user.uid), { nombre: nombreFinal });
+              } catch (e) {
+                console.log('No se pudo actualizar nombre:', e);
+              }
+            }
+
+            setUsuario({ ...data, uid: user.uid, nombre: nombreFinal });
+            setPantalla(data.rol === 'admin' ? 'admin' : 'feed');
+
+          } else {
+            // Si no existe doc, lo creamos para que el usuario no quede "loggeado pero fuera".
+            const nombreFinal =
+              user.displayName ||
+              user.email?.split('@')[0] ||
+              'Usuario';
+
+            await setDoc(userRef, {
+              nombre: nombreFinal,
+              email: user.email || '',
+              rol: 'miembro',
+              aprobado: false,
+              fechaRegistro: new Date().toISOString(),
+            }, { merge: true });
+
+            setUsuario(null);
+            setPantalla('pendiente');
+          }
+        } else {
+          setUsuario(null);
+          setPantalla('login');
         }
-      } else {
+      } catch (e) {
+        console.log('Error cargando usuario:', e);
         setUsuario(null);
         setPantalla('login');
+      } finally {
+        setCargando(false);
       }
-      setCargando(false);
     });
     return () => unsub();
   }, []);
@@ -77,6 +139,18 @@ function App() {
       )}
       {pantalla === 'register' && (
         <Register onBack={() => setPantalla('login')} />
+      )}
+      {pantalla === 'pendiente' && (
+        <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh',background:'linear-gradient(135deg,#1B2A6B,#0D1533)',flexDirection:'column',gap:'16px'}}>
+          <div style={{background:'white',borderRadius:'24px',padding:'40px',maxWidth:'400px',textAlign:'center',boxShadow:'0 24px 80px rgba(0,0,0,0.4)'}}>
+            <p style={{fontSize:'48px',margin:'0 0 12px'}}>⏳</p>
+            <h2 style={{color:'#1B2A6B',margin:'0 0 8px'}}>Cuenta pendiente</h2>
+            <p style={{color:'#666',fontSize:'14px',margin:'0 0 20px'}}>Tu cuenta está siendo revisada por el administrador. Te avisarán pronto.</p>
+            <button onClick={handleLogout} style={{padding:'12px 24px',background:'#1B2A6B',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'600'}}>
+              Volver al inicio
+            </button>
+          </div>
+        </div>
       )}
       {pantalla === 'feed' && usuario && (
         <Feed

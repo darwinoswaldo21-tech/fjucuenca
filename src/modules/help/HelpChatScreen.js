@@ -3,7 +3,9 @@ import useHelpChat from './hooks/useHelpChat';
 import { HELP_CATEGORIES } from './helpConfig';
 
 export default function HelpChatScreen({ currentUser, category, onBack }) {
-  const { messages, sendMessage, assignedLeader, loading } = useHelpChat(currentUser?.uid, category);
+  // El hook actual usa una sola coleccion "help_chat" y no implementa soporte real de categorias/asignacion.
+  // Esta pantalla se alinea al contrato real del hook: { messages, sendMessage } y mensajes { text, user }.
+  const { messages, sendMessage } = useHelpChat();
   const [text, setText] = useState('');
   const bottomRef = useRef(null);
 
@@ -15,11 +17,16 @@ export default function HelpChatScreen({ currentUser, category, onBack }) {
 
   const handleSend = async () => {
     if (!text.trim()) return;
-    await sendMessage(text);
+    const nombre =
+      currentUser?.nombre ||
+      currentUser?.displayName ||
+      currentUser?.email?.split('@')[0] ||
+      'Anon';
+    await sendMessage(text, nombre);
     setText('');
   };
 
-  if (loading) {
+  if (messages === null) {
     return (
       <div style={{ padding: 32, textAlign: 'center', color: '#aaa' }}>
         Conectando con un líder...
@@ -47,7 +54,7 @@ export default function HelpChatScreen({ currentUser, category, onBack }) {
         <div>
           <p style={{ margin: 0, fontWeight: 600, fontSize: 15 }}>{cat?.label}</p>
           <p style={{ margin: 0, fontSize: 12, color: '#888' }}>
-            {assignedLeader ? 'Líder asignado disponible' : 'En espera de asignación...'}
+            Chat de ayuda general
           </p>
         </div>
       </div>
@@ -61,25 +68,41 @@ export default function HelpChatScreen({ currentUser, category, onBack }) {
             Sé el primero en escribir. Estamos aquí para ayudarte 🙏
           </p>
         )}
-        {messages.map((msg) => (
-          <div key={msg.id} style={{
-            display: 'flex',
-            justifyContent: msg.senderId === currentUser?.uid ? 'flex-end' : 'flex-start'
-          }}>
-            <div style={{
-              maxWidth: '75%',
-              padding: '8px 14px',
-              borderRadius: msg.senderId === currentUser?.uid
-                ? '18px 18px 4px 18px'
-                : '18px 18px 18px 4px',
-              background: msg.senderId === currentUser?.uid ? cat?.color : '#f0f0f0',
-              color: msg.senderId === currentUser?.uid ? '#fff' : '#222',
-              fontSize: 14,
+        {messages.map((msg) => {
+          const nombre =
+            currentUser?.nombre ||
+            currentUser?.displayName ||
+            currentUser?.email?.split('@')[0] ||
+            'Anon';
+          const esMio = msg.user === nombre;
+
+          return (
+            <div key={msg.id} style={{
+              display: 'flex',
+              justifyContent: esMio ? 'flex-end' : 'flex-start'
             }}>
-              <p style={{ margin: 0 }}>{msg.text}</p>
+              <div style={{ maxWidth: '75%' }}>
+                {!esMio && (
+                  <p style={{ margin: '0 0 4px', fontSize: 12, color: '#888', fontWeight: 600 }}>
+                    {msg.user || 'Anon'}
+                  </p>
+                )}
+                <div style={{
+                  maxWidth: '75%',
+                  padding: '8px 14px',
+                  borderRadius: esMio
+                    ? '18px 18px 4px 18px'
+                    : '18px 18px 18px 4px',
+                  background: esMio ? cat?.color : '#f0f0f0',
+                  color: esMio ? '#fff' : '#222',
+                  fontSize: 14,
+                }}>
+                  <p style={{ margin: 0 }}>{msg.text}</p>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div ref={bottomRef} />
       </div>
 
