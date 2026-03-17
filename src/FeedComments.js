@@ -1,11 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { db, auth } from './firebase';
-import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 
 function FeedComments({ postId }) {
   const [comentarios, setComentarios] = useState([]);
   const [texto, setTexto] = useState('');
   const [mostrar, setMostrar] = useState(false);
+  const [nombreReal, setNombreReal] = useState('');
+
+  // FIX: cargar nombre real desde Firestore al montar
+  useEffect(() => {
+    const cargarNombre = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+      try {
+        const snap = await getDoc(doc(db, 'usuarios', user.uid));
+        if (snap.exists()) {
+          const data = snap.data();
+          const nombre = data.nombre && data.nombre.trim() !== ''
+            ? data.nombre
+            : user.displayName || user.email?.split('@')[0] || 'Usuario';
+          setNombreReal(nombre);
+        }
+      } catch (e) {
+        setNombreReal(user.displayName || user.email?.split('@')[0] || 'Usuario');
+      }
+    };
+    cargarNombre();
+  }, []);
 
   useEffect(() => {
     if (!mostrar) return;
@@ -21,10 +43,12 @@ function FeedComments({ postId }) {
   const enviar = async () => {
     if (!texto.trim()) return;
     const usuario = auth.currentUser;
+    // FIX: usar nombreReal cargado desde Firestore
+    const nombre = nombreReal || usuario.displayName || usuario.email?.split('@')[0] || 'Usuario';
     await addDoc(collection(db, 'posts', postId, 'comments'), {
       texto: texto.trim(),
       uid: usuario.uid,
-      displayName: usuario.displayName || 'Usuario',
+      displayName: nombre,
       createdAt: serverTimestamp(),
     });
     setTexto('');
@@ -36,7 +60,7 @@ function FeedComments({ postId }) {
         onClick={() => setMostrar(!mostrar)}
         style={estilos.toggleBtn}
       >
-        💬 {mostrar ? 'Ocultar comentarios' : `Comentar`}
+        💬 {mostrar ? 'Ocultar comentarios' : 'Comentar'}
       </button>
 
       {mostrar && (
