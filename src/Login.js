@@ -91,6 +91,9 @@ function Login({ onRegister }) {
                 <li className="fju-heroItem"><span className="fju-heroDot" /> Notificaciones</li>
               </ul>
             </div>
+
+            <div className="fju-heroArt" aria-hidden="true" />
+
             <div className="fju-heroFooter">
               <div>Unidos en Cristo. Comparte con amor.</div>
               <div className="fju-heroFooterRight">FJU Cuenca</div>
