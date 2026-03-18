@@ -5,11 +5,10 @@ import {
   collection,
   doc,
   onSnapshot,
-  orderBy,
-  query,
   serverTimestamp,
   setDoc,
   updateDoc,
+  query,
   where,
 } from 'firebase/firestore';
 import './Groups.css';
@@ -31,10 +30,11 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
   const [editDesc, setEditDesc] = useState('');
   const [savingGroup, setSavingGroup] = useState(false);
 
-  const [episodes, setEpisodes] = useState([]);
+  const [entries, setEntries] = useState([]);
   const [pending, setPending] = useState([]);
 
   const [adding, setAdding] = useState(false);
+  const [videoType, setVideoType] = useState('episode'); // 'episode' | 'extra'
   const [season, setSeason] = useState('1');
   const [episodeNumber, setEpisodeNumber] = useState('1');
   const [title, setTitle] = useState('');
@@ -72,12 +72,14 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
 
   useEffect(() => {
     if (!groupId || !isApproved) {
-      setEpisodes([]);
+      setEntries([]);
       return undefined;
     }
-    const q = query(collection(db, 'groups', groupId, 'episodes'), orderBy('season', 'asc'), orderBy('episodeNumber', 'asc'));
-    const unsub = onSnapshot(q, (snap) => {
-      setEpisodes(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+
+    // Load all group videos (episodes + extras) and split/sort client-side.
+    // This avoids needing a Firestore composite index at this stage.
+    const unsub = onSnapshot(collection(db, 'groups', groupId, 'episodes'), (snap) => {
+      setEntries(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
     });
     return () => unsub();
   }, [groupId, isApproved]);
@@ -96,7 +98,7 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
 
   useEffect(() => {
     listBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [episodes.length]);
+  }, [entries.length]);
 
   const requestJoin = async () => {
     if (!groupId || !currentUid) return;
@@ -159,37 +161,51 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
       return;
     }
 
-    // Allow 0 (e.g. shorts/intro) but default to 1 when the input is empty.
-    const seasonValue = String(season ?? '').trim() === '' ? 1 : Number(season);
-    const episodeValue = String(episodeNumber ?? '').trim() === '' ? 1 : Number(episodeNumber);
-    if (!Number.isFinite(seasonValue) || seasonValue < 0) {
-      setNote('Temporada invalida.');
-      return;
-    }
-    if (!Number.isFinite(episodeValue) || episodeValue < 0) {
-      setNote('Capitulo # invalido.');
-      return;
-    }
-
     setSaving(true);
     setNote(null);
     try {
-      await addDoc(collection(db, 'groups', groupId, 'episodes'), {
-        season: seasonValue,
-        episodeNumber: episodeValue,
-        title: title.trim(),
-        youtubeId: yt,
-        youtubeUrl: youtubeUrl.trim(),
-        thumbnail: `https://img.youtube.com/vi/${yt}/hqdefault.jpg`,
-        createdBy: currentUid,
-        createdAt: serverTimestamp(),
-      });
+      if (videoType === 'extra') {
+        await addDoc(collection(db, 'groups', groupId, 'episodes'), {
+          category: 'extra',
+          title: title.trim(),
+          youtubeId: yt,
+          youtubeUrl: youtubeUrl.trim(),
+          thumbnail: `https://img.youtube.com/vi/${yt}/hqdefault.jpg`,
+          createdBy: currentUid,
+          createdAt: serverTimestamp(),
+        });
+      } else {
+        // Allow 0 (e.g. shorts/intro) but default to 1 when the input is empty.
+        const seasonValue = String(season ?? '').trim() === '' ? 1 : Number(season);
+        const episodeValue = String(episodeNumber ?? '').trim() === '' ? 1 : Number(episodeNumber);
+        if (!Number.isFinite(seasonValue) || seasonValue < 0) {
+          setNote('Temporada invalida.');
+          return;
+        }
+        if (!Number.isFinite(episodeValue) || episodeValue < 0) {
+          setNote('Capitulo # invalido.');
+          return;
+        }
+
+        await addDoc(collection(db, 'groups', groupId, 'episodes'), {
+          category: 'episode',
+          season: seasonValue,
+          episodeNumber: episodeValue,
+          title: title.trim(),
+          youtubeId: yt,
+          youtubeUrl: youtubeUrl.trim(),
+          thumbnail: `https://img.youtube.com/vi/${yt}/hqdefault.jpg`,
+          createdBy: currentUid,
+          createdAt: serverTimestamp(),
+        });
+        setEpisodeNumber(String(episodeValue + 1));
+      }
+
       setAdding(false);
       setTitle('');
       setYoutubeUrl('');
-      setEpisodeNumber(String(episodeValue + 1));
     } catch (e) {
-      setNote('No se pudo guardar el capitulo.');
+      setNote(videoType === 'extra' ? 'No se pudo guardar el extra.' : 'No se pudo guardar el capitulo.');
     } finally {
       setSaving(false);
     }
@@ -212,6 +228,30 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
   const groupTitle = group?.name || 'Grupo';
   const groupDesc = group?.description || '';
   const canOpenExternal = !!group && (canModerate || group.createdBy === currentUid);
+  const showAddForm = adding;
+
+  const episodesList = entries
+    .filter((e) => (e.category || 'episode') === 'episode')
+    .slice()
+    .sort((a, b) => {
+      const sa = Number(a.season ?? 1);
+      const sb = Number(b.season ?? 1);
+      if (sa !== sb) return sa - sb;
+      const ea = Number(a.episodeNumber ?? 1);
+      const eb = Number(b.episodeNumber ?? 1);
+      return ea - eb;
+    });
+
+  const extrasList = entries
+    .filter((e) => (e.category || 'episode') === 'extra')
+    .slice()
+    .sort((a, b) => {
+      // Prefer createdAt if present; fallback to title.
+      const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+      const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+      if (ta !== tb) return tb - ta;
+      return String(a.title || '').localeCompare(String(b.title || ''), 'es');
+    });
 
   return (
     <div className="fju-groups">
@@ -224,7 +264,32 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {isApproved && tabBtn('episodes', 'Capitulos')}
+            {isApproved && (
+              <button
+                className="fju-gBtn"
+                style={{
+                  borderColor: tab === 'episodes' ? 'rgba(245,166,35,0.45)' : 'rgba(255,255,255,0.14)',
+                  background: tab === 'episodes' ? 'rgba(245,166,35,0.14)' : 'rgba(255,255,255,0.06)',
+                }}
+                onClick={() => { setTab('episodes'); setVideoType('episode'); }}
+                type="button"
+              >
+                Capitulos
+              </button>
+            )}
+            {isApproved && (
+              <button
+                className="fju-gBtn"
+                style={{
+                  borderColor: tab === 'extras' ? 'rgba(245,166,35,0.45)' : 'rgba(255,255,255,0.14)',
+                  background: tab === 'extras' ? 'rgba(245,166,35,0.14)' : 'rgba(255,255,255,0.06)',
+                }}
+                onClick={() => { setTab('extras'); setVideoType('extra'); }}
+                type="button"
+              >
+                Extras
+              </button>
+            )}
             {canModerate && tabBtn('requests', `Solicitudes (${pending.length})`)}
             {canModerate && (
               <button className="fju-gBtn" onClick={() => setEditingGroup(!editingGroup)} type="button">
@@ -289,12 +354,24 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
               <div className="fju-gCard">
                 <div className="fju-gCardHead">
                   <div style={{ fontWeight: 900, color: '#1b2a6b' }}>Capitulos</div>
-                  <button className="fju-gBtn" onClick={() => setAdding(!adding)} type="button">
+                  <button className="fju-gBtn" onClick={() => { setAdding(!adding); setVideoType('episode'); }} type="button">
                     {adding ? 'Cancelar' : 'Subir capitulo'}
                   </button>
                 </div>
-                {adding && (
+                {showAddForm && (
                   <div className="fju-gCardBody" style={{ display: 'grid', gap: 10 }}>
+                    <select
+                      className="fju-gSelect"
+                      value={videoType}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setVideoType(v);
+                        setTab(v === 'extra' ? 'extras' : 'episodes');
+                      }}
+                    >
+                      <option value="episode">Capitulo</option>
+                      <option value="extra">Extra (opiniones, actores, etc.)</option>
+                    </select>
                     <div className="fju-gFormRow">
                       <input className="fju-gInput" value={season} onChange={(e) => setSeason(e.target.value)} placeholder="Temporada" />
                       <input className="fju-gInput" value={episodeNumber} onChange={(e) => setEpisodeNumber(e.target.value)} placeholder="Capitulo #" />
@@ -315,13 +392,13 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
             <div className="fju-gCard">
               <div className="fju-gCardHead">
                 <div style={{ fontWeight: 900, color: '#1b2a6b' }}>Lista</div>
-                <div className="fju-gNote">{episodes.length} capitulos</div>
+                <div className="fju-gNote">{episodesList.length} capitulos</div>
               </div>
               <div className="fju-gCardBody" style={{ display: 'grid', gap: 12 }}>
-                {episodes.length === 0 && (
+                {episodesList.length === 0 && (
                   <div className="fju-gNote">Aun no hay capitulos. El admin puede subir el primero.</div>
                 )}
-                {episodes.map((ep) => (
+                {episodesList.map((ep) => (
                   <div key={ep.id} className="fju-epItem">
                     <div className="fju-epHead">
                       <div>
@@ -329,6 +406,86 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
                           T{ep.season ?? 1} Â· E{ep.episodeNumber ?? 1} â€” {ep.title}
                         </p>
                         <p className="fju-epMeta">SERIE DE DIOS</p>
+                      </div>
+                      {canOpenExternal && (
+                        <a
+                          className="fju-gBtn"
+                          href={ep.youtubeUrl || `https://youtu.be/${ep.youtubeId}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ textDecoration: 'none' }}
+                        >
+                          Abrir
+                        </a>
+                      )}
+                    </div>
+                    <iframe
+                      className="fju-epFrame"
+                      src={`https://www.youtube.com/embed/${ep.youtubeId}`}
+                      title={ep.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    />
+                  </div>
+                ))}
+                <div ref={listBottomRef} />
+              </div>
+            </div>
+          </>
+        )}
+
+        {isApproved && tab === 'extras' && (
+          <>
+            {canModerate && (
+              <div className="fju-gCard">
+                <div className="fju-gCardHead">
+                  <div style={{ fontWeight: 900, color: '#1b2a6b' }}>Extras</div>
+                  <button className="fju-gBtn" onClick={() => { setAdding(!adding); setVideoType('extra'); }} type="button">
+                    {adding && videoType === 'extra' ? 'Cancelar' : 'Subir extra'}
+                  </button>
+                </div>
+                {showAddForm && (
+                  <div className="fju-gCardBody" style={{ display: 'grid', gap: 10 }}>
+                    <select
+                      className="fju-gSelect"
+                      value={videoType}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setVideoType(v);
+                        setTab(v === 'extra' ? 'extras' : 'episodes');
+                      }}
+                    >
+                      <option value="extra">Extra (opiniones, actores, etc.)</option>
+                      <option value="episode">Capitulo</option>
+                    </select>
+                    <input className="fju-gInput" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titulo del video" />
+                    <input className="fju-gInput" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="Link de YouTube (No listado)" />
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      <button className="fju-gPrimary" onClick={addEpisode} disabled={saving} type="button">
+                        {saving ? 'Guardando...' : 'Guardar'}
+                      </button>
+                    </div>
+                    <div className="fju-gNote">Extras: opiniones, entrevistas, detras de camaras, clips.</div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="fju-gCard">
+              <div className="fju-gCardHead">
+                <div style={{ fontWeight: 900, color: '#1b2a6b' }}>Lista</div>
+                <div className="fju-gNote">{extrasList.length} videos</div>
+              </div>
+              <div className="fju-gCardBody" style={{ display: 'grid', gap: 12 }}>
+                {extrasList.length === 0 && (
+                  <div className="fju-gNote">Aun no hay extras. Puedes subir opiniones, entrevistas o clips.</div>
+                )}
+                {extrasList.map((ep) => (
+                  <div key={ep.id} className="fju-epItem">
+                    <div className="fju-epHead">
+                      <div>
+                        <p className="fju-epTitle">{ep.title}</p>
+                        <p className="fju-epMeta">EXTRA</p>
                       </div>
                       {canOpenExternal && (
                         <a
