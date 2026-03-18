@@ -4,7 +4,7 @@ import { collection, addDoc, getDocs, onSnapshot, orderBy, query, where, doc, de
 import FeedComments from './FeedComments';
 import './FeedPro.css';
 
-function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onChat, onChatPrivado }) {
+function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, onChatPrivado }) {
   const [posts, setPosts] = useState([]);
   const [nuevo, setNuevo] = useState('');
   const [loading, setLoading] = useState(false);
@@ -196,9 +196,8 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onChat, onChatPriv
           <button onClick={onHelp} className="fju-chip fju-chipPrimary" type="button">
             🙏 Help
           </button>
-          <button onClick={onMedias} className="fju-chip fju-chipPrimary" type="button">
-            📸 Medios
-          </button>
+                    <button onClick={onMedias} className="fju-chip fju-chipPrimary" type="button">Medios</button>
+          <button onClick={onGroups} className="fju-chip fju-chipPrimary" type="button">Grupos</button>
           {onAdmin && (
             <button onClick={onAdmin} className="fju-chip fju-chipAdmin" type="button">Admin</button>
           )}

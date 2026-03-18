@@ -13,12 +13,15 @@ import HelpChatScreen from './modules/help/HelpChatScreen';
 import ResourcesScreen from './modules/help/ResourcesScreen';
 import MediaScreen from './modules/medios/MediaScreen';
 import { setPresenceOffline, setPresenceOnline } from './presence';
+import GroupListScreen from './groups/GroupListScreen';
+import GroupScreen from './groups/GroupScreen';
 
 function App() {
   const [pantalla, setPantalla] = useState('login');
   const [usuario, setUsuario] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [helpCategory, setHelpCategory] = useState(null);
+  const [activeGroupId, setActiveGroupId] = useState(null);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
@@ -169,6 +172,7 @@ function App() {
           onChatPrivado={() => setPantalla('mensajes')}
           onHelp={() => setPantalla('help')}
           onMedias={() => setPantalla('medios')}
+          onGroups={() => setPantalla('groups')}
         />
       )}
       {pantalla === 'admin' && usuario && (
@@ -205,6 +209,23 @@ function App() {
       )}
       {pantalla === 'medios' && usuario && (
         <MediaScreen usuario={usuario} onBack={() => setPantalla('feed')} />
+      )}
+      {pantalla === 'groups' && usuario && (
+        <GroupListScreen
+          usuario={usuario}
+          onBack={() => setPantalla('feed')}
+          onOpenGroup={(id) => {
+            setActiveGroupId(id);
+            setPantalla('group');
+          }}
+        />
+      )}
+      {pantalla === 'group' && usuario && activeGroupId && (
+        <GroupScreen
+          usuario={usuario}
+          groupId={activeGroupId}
+          onBack={() => setPantalla('groups')}
+        />
       )}
     </div>
   );

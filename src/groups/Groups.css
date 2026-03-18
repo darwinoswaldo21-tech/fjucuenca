@@ -1,0 +1,200 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;600&display=swap');
+
+.fju-groups {
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 800px at 20% 10%, rgba(245, 166, 35, 0.18), transparent 55%),
+    radial-gradient(900px 700px at 80% 0%, rgba(61, 90, 153, 0.32), transparent 60%),
+    linear-gradient(180deg, #0b1020, #0f1b3a);
+  font-family: "Space Grotesk", "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.fju-gTop {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding: 10px 14px;
+  backdrop-filter: blur(14px);
+  background: rgba(15, 27, 58, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fju-gTopInner {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fju-gTitle {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.fju-gBtn {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+  padding: 7px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.fju-gShell {
+  max-width: 980px;
+  margin: 14px auto 30px;
+  padding: 0 14px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.fju-gCard {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.fju-gCardHead {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(12, 18, 34, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.70));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fju-gCardBody { padding: 14px; }
+
+.fju-gGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.fju-gItem {
+  border-radius: 14px;
+  border: 1px solid rgba(12, 18, 34, 0.10);
+  background: rgba(255, 255, 255, 0.75);
+  padding: 12px;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.fju-gItem:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.12);
+}
+
+.fju-gItemTitle {
+  margin: 0;
+  color: #1b2a6b;
+  font-weight: 800;
+  font-size: 14.5px;
+}
+
+.fju-gItemDesc {
+  margin: 6px 0 0;
+  color: rgba(12, 18, 34, 0.62);
+  font-size: 12.5px;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.fju-gFormRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.fju-gInput, .fju-gTextarea, .fju-gSelect {
+  width: 100%;
+  padding: 10px 11px;
+  border-radius: 12px;
+  border: 1px solid rgba(12, 18, 34, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+  outline: none;
+  font-size: 13.5px;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+.fju-gTextarea { resize: vertical; min-height: 76px; }
+
+.fju-gPrimary {
+  padding: 9px 14px;
+  border-radius: 12px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 800;
+  color: white;
+  background: linear-gradient(135deg, #1b2a6b, #3d5a99);
+  box-shadow: 0 18px 40px rgba(27, 42, 107, 0.20);
+}
+
+.fju-gDanger {
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(229, 62, 62, 0.35);
+  background: rgba(229, 62, 62, 0.10);
+  color: #b91c1c;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 12.5px;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.fju-gNote {
+  color: rgba(12, 18, 34, 0.55);
+  font-size: 12.5px;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.fju-epItem {
+  border-radius: 14px;
+  border: 1px solid rgba(12, 18, 34, 0.10);
+  background: rgba(255, 255, 255, 0.80);
+  overflow: hidden;
+}
+
+.fju-epHead {
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.fju-epTitle {
+  margin: 0;
+  color: #1b2a6b;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.fju-epMeta {
+  margin: 2px 0 0;
+  color: rgba(12, 18, 34, 0.55);
+  font-size: 12px;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.fju-epFrame {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  display: block;
+}
+
+@media (max-width: 860px) {
+  .fju-gGrid { grid-template-columns: 1fr; }
+  .fju-gFormRow { grid-template-columns: 1fr; }
+}
+
