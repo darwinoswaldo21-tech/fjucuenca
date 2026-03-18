@@ -65,13 +65,13 @@ function Login({ onRegister }) {
       )}
 
       <div className="fju-authGrid">
-        <div className="fju-hero">
-          <div
-            className="fju-heroInner"
-            style={{
-              '--fju-hero-img': `url("${process.env.PUBLIC_URL}/mi-bienvenida.png")`,
-            }}
-          >
+        <div
+          className="fju-hero"
+          style={{
+            '--fju-hero-img': `url("${process.env.PUBLIC_URL}/mi-bienvenida.png")`,
+          }}
+        >
+          <div className="fju-heroInner">
             <div className="fju-heroContent">
               <div className="fju-heroBadge">
                 <span className="fju-heroMark">F</span>
@@ -84,11 +84,8 @@ function Login({ onRegister }) {
               </p>
               <ul className="fju-heroList">
                 <li className="fju-heroItem"><span className="fju-heroDot" /> Feed de la comunidad</li>
-                <li className="fju-heroItem"><span className="fju-heroDot" /> Mensajes privados</li>
-                <li className="fju-heroItem"><span className="fju-heroDot" /> Grupos y series</li>
-                <li className="fju-heroItem"><span className="fju-heroDot" /> Medios (fotos/videos)</li>
-                <li className="fju-heroItem"><span className="fju-heroDot" /> Help y recursos</li>
-                <li className="fju-heroItem"><span className="fju-heroDot" /> Notificaciones</li>
+                <li className="fju-heroItem"><span className="fju-heroDot" /> Grupos (series y extras)</li>
+                <li className="fju-heroItem"><span className="fju-heroDot" /> Mensajes y notificaciones</li>
               </ul>
             </div>
 
