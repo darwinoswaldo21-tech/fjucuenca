@@ -26,6 +26,10 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
   const [group, setGroup] = useState(null);
   const [member, setMember] = useState(null);
   const [tab, setTab] = useState('episodes');
+  const [editingGroup, setEditingGroup] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editDesc, setEditDesc] = useState('');
+  const [savingGroup, setSavingGroup] = useState(false);
 
   const [episodes, setEpisodes] = useState([]);
   const [pending, setPending] = useState([]);
@@ -58,6 +62,13 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
 
   const isApproved = member?.status === 'approved';
   const canModerate = isApproved && (member?.role === 'admin' || member?.role === 'mod');
+
+  useEffect(() => {
+    if (!group) return;
+    if (editingGroup) return;
+    setEditName(group.name || '');
+    setEditDesc(group.description || '');
+  }, [group, editingGroup]);
 
   useEffect(() => {
     if (!groupId || !isApproved) {
@@ -110,6 +121,30 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
       role: 'member',
       approvedAt: serverTimestamp(),
     });
+  };
+
+  const saveGroup = async () => {
+    if (!groupId) return;
+    if (!editName.trim()) {
+      setNote('El nombre del grupo no puede estar vacio.');
+      return;
+    }
+
+    setSavingGroup(true);
+    setNote(null);
+    try {
+      await updateDoc(doc(db, 'groups', groupId), {
+        name: editName.trim(),
+        description: editDesc.trim(),
+        updatedAt: serverTimestamp(),
+      });
+      setEditingGroup(false);
+      setNote('Grupo actualizado.');
+    } catch (e) {
+      setNote('No se pudo actualizar el grupo.');
+    } finally {
+      setSavingGroup(false);
+    }
   };
 
   const addEpisode = async () => {
@@ -178,12 +213,34 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             {isApproved && tabBtn('episodes', 'Capitulos')}
             {canModerate && tabBtn('requests', `Solicitudes (${pending.length})`)}
+            {canModerate && (
+              <button className="fju-gBtn" onClick={() => setEditingGroup(!editingGroup)} type="button">
+                {editingGroup ? 'Cancelar' : 'Editar'}
+              </button>
+            )}
             <button className="fju-gBtn" onClick={onBack} type="button">Volver</button>
           </div>
         </div>
       </div>
 
       <div className="fju-gShell">
+        {isApproved && canModerate && editingGroup && (
+          <div className="fju-gCard">
+            <div className="fju-gCardHead">
+              <div style={{ fontWeight: 900, color: '#1b2a6b' }}>Editar grupo</div>
+              <div className="fju-gNote">Solo admins/mods</div>
+            </div>
+            <div className="fju-gCardBody" style={{ display: 'grid', gap: 10 }}>
+              <input className="fju-gInput" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Nombre del grupo" />
+              <textarea className="fju-gTextarea" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} placeholder="Descripcion" />
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button className="fju-gPrimary" onClick={saveGroup} disabled={savingGroup} type="button">
+                  {savingGroup ? 'Guardando...' : 'Guardar cambios'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {note && (
           <div className="fju-gCard">
             <div className="fju-gCardBody">
