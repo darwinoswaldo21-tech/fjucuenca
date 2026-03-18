@@ -1,11 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from './firebase';
-import { collection, addDoc, getDocs, onSnapshot, orderBy, query, where, doc, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, onSnapshot, orderBy, query, where, doc, deleteDoc, limit, startAfter } from 'firebase/firestore';
 import FeedComments from './FeedComments';
 import './FeedPro.css';
 
 function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, onChatPrivado }) {
-  const [posts, setPosts] = useState([]);
+  // Feed: 20 posts mas recientes en tiempo real + "Cargar mas" para posts antiguos.
+  const PAGE_SIZE = 20;
+  const [recentPosts, setRecentPosts] = useState([]);
+  const [olderPosts, setOlderPosts] = useState([]);
+  const [cursorDoc, setCursorDoc] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadedMoreOnce, setLoadedMoreOnce] = useState(false);
   const [nuevo, setNuevo] = useState('');
   const [loading, setLoading] = useState(false);
   const [notif, setNotif] = useState(null);
@@ -38,12 +45,37 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
   }, [inlinePrivado]);
 
   useEffect(() => {
-    const q = query(collection(db, 'posts'), orderBy('fecha', 'desc'));
+    const q = query(collection(db, 'posts'), orderBy('fecha', 'desc'), limit(PAGE_SIZE));
     const unsub = onSnapshot(q, (snap) => {
-      setPosts(snap.docs.map(d => ({id: d.id, ...d.data()})));
+      setRecentPosts(snap.docs.map(d => ({id: d.id, ...d.data()})));
+
+      const last = snap.docs.length ? snap.docs[snap.docs.length - 1] : null;
+      if (!loadedMoreOnce) setCursorDoc(last);
+      setHasMore(snap.docs.length === PAGE_SIZE);
     });
     return () => unsub();
-  }, []);
+  }, [PAGE_SIZE, loadedMoreOnce]);
+
+  const cargarMas = async () => {
+    if (!cursorDoc || loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+    try {
+      const q = query(collection(db, 'posts'), orderBy('fecha', 'desc'), startAfter(cursorDoc), limit(PAGE_SIZE));
+      const snap = await getDocs(q);
+      const list = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      setOlderPosts(prev => [...prev, ...list]);
+
+      const last = snap.docs.length ? snap.docs[snap.docs.length - 1] : cursorDoc;
+      setCursorDoc(last);
+      setHasMore(snap.docs.length === PAGE_SIZE);
+      setLoadedMoreOnce(true);
+    } catch (e) {
+      mostrarNotif('No se pudo cargar mas publicaciones', 'error');
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   useEffect(() => {
     if (!inlineChat) return;
@@ -159,6 +191,21 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
     return usuario.uid === post.autorId || usuario.rol === 'admin';
   };
 
+  const posts = (() => {
+    // Merge (recent first) + older, avoid duplicates when realtime updates happen.
+    const out = [];
+    const seen = new Set();
+    for (const p of [...recentPosts, ...olderPosts]) {
+      if (!p || !p.id) continue;
+      if (seen.has(p.id)) continue;
+      seen.add(p.id);
+      out.push(p);
+    }
+    return out;
+  })();
+
+  const visiblePosts = posts.filter(p => p.aprobado);
+
   return (
     <div className="fju-feed">
       {notif && (
@@ -233,13 +280,13 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
           </div>
 
           {/* Posts */}
-          {posts.filter(p=>p.aprobado).length === 0 && (
+          {visiblePosts.length === 0 && (
             <div style={{textAlign:'center',padding:'40px',color:'#aaa'}}>
               <p style={{fontSize:'48px'}}>✝️</p>
               <p>Aun no hay publicaciones. Se el primero en compartir!</p>
             </div>
           )}
-          {posts.filter(p=>p.aprobado).map(post => (
+          {visiblePosts.map(post => (
             <div key={post.id} className="fju-card" style={{padding:'16px',marginBottom:'12px'}}>
               <div style={{display:'flex',alignItems:'center',gap:'12px',marginBottom:'12px'}}>
                 <div className="fju-avatar" style={{width:'40px',height:'40px',borderRadius:'50%'}}>
@@ -295,6 +342,16 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
               <FeedComments postId={post.id} />
             </div>
           ))}
+
+          <div style={{display:'flex',justifyContent:'center',padding:'10px 0 26px'}}>
+            {hasMore ? (
+              <button onClick={cargarMas} disabled={loadingMore} className="fju-chip" type="button">
+                {loadingMore ? 'Cargando...' : 'Cargar mas'}
+              </button>
+            ) : (
+              <div style={{color:'#999',fontSize:'12.5px'}}>No hay mas publicaciones.</div>
+            )}
+          </div>
         </div>
       )}
 
