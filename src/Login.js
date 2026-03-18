@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { auth } from './firebase';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import './Login.css';
 
 function Login({ onRegister }) {
   const [email, setEmail] = useState('');
@@ -10,7 +11,7 @@ function Login({ onRegister }) {
   const [notif, setNotif] = useState(null);
 
   const mostrarNotif = (msg, tipo) => {
-    setNotif({msg, tipo});
+    setNotif({ msg, tipo });
     setTimeout(() => setNotif(null), 4000);
   };
 
@@ -24,8 +25,12 @@ function Login({ onRegister }) {
       await signInWithEmailAndPassword(auth, email, password);
       mostrarNotif('Bienvenido a FJU Cuenca!', 'exito');
     } catch (err) {
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        mostrarNotif('Correo o contraseña incorrectos', 'error');
+      if (
+        err.code === 'auth/user-not-found'
+        || err.code === 'auth/wrong-password'
+        || err.code === 'auth/invalid-credential'
+      ) {
+        mostrarNotif('Correo o contrasena incorrectos', 'error');
       } else {
         mostrarNotif(err.message, 'error');
       }
@@ -40,9 +45,9 @@ function Login({ onRegister }) {
     }
     try {
       await sendPasswordResetEmail(auth, email);
-      mostrarNotif('Correo de recuperación enviado!', 'exito');
+      mostrarNotif('Correo de recuperacion enviado!', 'exito');
     } catch (err) {
-      mostrarNotif('No se encontró ese correo', 'error');
+      mostrarNotif('No se encontro ese correo', 'error');
     }
   };
 
@@ -51,56 +56,100 @@ function Login({ onRegister }) {
   };
 
   return (
-    <div style={{minHeight:'100vh',background:'linear-gradient(135deg,#1B2A6B,#0D1533)',display:'flex',alignItems:'center',justifyContent:'center',padding:'20px'}}>
+    <div className="fju-auth">
       {notif && (
-        <div style={{position:'fixed',top:'24px',left:'50%',transform:'translateX(-50%)',background:notif.tipo==='exito'?'#1B2A6B':'#e53e3e',color:'white',padding:'16px 32px',borderRadius:'12px',boxShadow:'0 8px 32px rgba(0,0,0,0.25)',fontSize:'15px',fontWeight:'500',zIndex:1000,textAlign:'center',minWidth:'300px'}}>
-          {notif.tipo==='exito'?'✓ ':'✕ '}{notif.msg}
+        <div className={`fju-toastAuth ${notif.tipo === 'exito' ? '' : 'fju-toastErr'}`}>
+          {notif.tipo === 'exito' ? 'OK: ' : 'ERROR: '}
+          {notif.msg}
         </div>
       )}
-      <div style={{background:'white',borderRadius:'24px',padding:'40px',width:'100%',maxWidth:'400px',boxShadow:'0 24px 80px rgba(0,0,0,0.4)'}}>
-        <div style={{textAlign:'center',marginBottom:'28px'}}>
-          <img src="/fondo1.jpg" alt="FJU" style={{width:'80px',height:'80px',borderRadius:'50%',objectFit:'cover',border:'3px solid #1B2A6B',marginBottom:'12px'}} />
-          <h1 style={{color:'#1B2A6B',margin:'0 0 4px',fontSize:'24px',fontWeight:'700'}}>FJU Cuenca</h1>
-          <p style={{color:'#888',margin:0,fontSize:'14px'}}>Bienvenido de vuelta</p>
+
+      <div className="fju-authGrid">
+        <div className="fju-hero">
+          <div className="fju-heroInner">
+            <div className="fju-heroContent">
+              <div className="fju-heroBadge">
+                <span className="fju-heroMark">F</span>
+                Comunidad FJU Cuenca
+              </div>
+              <h1 className="fju-heroTitle">Explora lo que mas te gusta.</h1>
+              <p className="fju-heroSub">
+                Una red social para jovenes de la iglesia: comparte, comenta, mira series,
+                y mantente conectado con tu comunidad.
+              </p>
+              <ul className="fju-heroList">
+                <li className="fju-heroItem"><span className="fju-heroDot" /> Feed de la comunidad</li>
+                <li className="fju-heroItem"><span className="fju-heroDot" /> Mensajes privados</li>
+                <li className="fju-heroItem"><span className="fju-heroDot" /> Grupos y series</li>
+                <li className="fju-heroItem"><span className="fju-heroDot" /> Medios (fotos/videos)</li>
+                <li className="fju-heroItem"><span className="fju-heroDot" /> Help y recursos</li>
+                <li className="fju-heroItem"><span className="fju-heroDot" /> Notificaciones</li>
+              </ul>
+            </div>
+            <div className="fju-heroFooter">
+              <div>Unidos en Cristo. Comparte con amor.</div>
+              <div className="fju-heroFooterRight">FJU Cuenca</div>
+            </div>
+          </div>
         </div>
-        <label style={{display:'block',color:'#444',fontSize:'12px',fontWeight:'700',marginBottom:'6px'}}>CORREO ELECTRONICO</label>
-        <input
-          type="email"
-          placeholder="tucorreo@gmail.com"
-          value={email}
-          onChange={(e)=>setEmail(e.target.value)}
-          onKeyDown={handleKey}
-          style={{width:'100%',padding:'14px',borderRadius:'10px',border:'2px solid #eee',boxSizing:'border-box',fontSize:'15px',outline:'none',marginBottom:'16px'}}
-        />
-        <label style={{display:'block',color:'#444',fontSize:'12px',fontWeight:'700',marginBottom:'6px'}}>CONTRASENA</label>
-        <div style={{position:'relative',marginBottom:'8px'}}>
+
+        <div className="fju-authCard">
+          <div className="fju-authHead">
+            <img src="/fondo1.jpg" alt="FJU" className="fju-authLogo" />
+            <h1 className="fju-authTitle">FJU Cuenca</h1>
+            <p className="fju-authSub">Inicia sesion para continuar</p>
+          </div>
+
+          <label className="fju-label">CORREO ELECTRONICO</label>
           <input
-            type={verPass?'text':'password'}
-            placeholder="Tu contraseña"
-            value={password}
-            onChange={(e)=>setPassword(e.target.value)}
+            type="email"
+            placeholder="tucorreo@gmail.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             onKeyDown={handleKey}
-            style={{width:'100%',padding:'14px',paddingRight:'48px',borderRadius:'10px',border:'2px solid #eee',boxSizing:'border-box',fontSize:'15px',outline:'none'}}
+            className="fju-input"
           />
-          <button onClick={()=>setVerPass(!verPass)} style={{position:'absolute',right:'12px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'18px'}}>
-            {verPass?'🙈':'👁️'}
+
+          <label className="fju-label">CONTRASENA</label>
+          <div className="fju-passWrap">
+            <input
+              type={verPass ? 'text' : 'password'}
+              placeholder="Tu contrasena"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={handleKey}
+              className="fju-input"
+              style={{ paddingRight: 48, marginBottom: 0 }}
+            />
+            <button
+              onClick={() => setVerPass(!verPass)}
+              className="fju-passBtn"
+              type="button"
+              aria-label="Ver contrasena"
+            >
+              {verPass ? '🙈' : '👁️'}
+            </button>
+          </div>
+
+          <div className="fju-authActions">
+            <button onClick={handleOlvide} className="fju-linkBtn" type="button">
+              Olvide mi contrasena
+            </button>
+          </div>
+
+          <button onClick={handleLogin} disabled={loading} className="fju-primary" type="button">
+            {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
-        </div>
-        <div style={{textAlign:'right',marginBottom:'20px'}}>
-          <button onClick={handleOlvide} style={{background:'none',border:'none',color:'#1B2A6B',fontSize:'13px',cursor:'pointer',fontWeight:'600'}}>
-            Olvide mi contraseña
+          <button onClick={onRegister} className="fju-secondary" type="button">
+            No tengo cuenta - Registrarme
           </button>
+
+          <p className="fju-authFoot">FJU Cuenca</p>
         </div>
-        <button onClick={handleLogin} disabled={loading} style={{width:'100%',padding:'16px',background:loading?'#888':'linear-gradient(135deg,#1B2A6B,#3d5a99)',color:'white',border:'none',borderRadius:'12px',fontSize:'16px',cursor:loading?'not-allowed':'pointer',fontWeight:'700',marginBottom:'12px'}}>
-          {loading?'Ingresando...':'Ingresar'}
-        </button>
-        <button onClick={onRegister} style={{width:'100%',padding:'14px',background:'transparent',color:'#1B2A6B',border:'2px solid #1B2A6B',borderRadius:'12px',fontSize:'15px',cursor:'pointer',fontWeight:'600'}}>
-          No tengo cuenta — Registrarme
-        </button>
-        <p style={{textAlign:'center',marginTop:'16px',color:'#aaa',fontSize:'12px'}}>Unidos en Cristo ✝️</p>
       </div>
     </div>
   );
 }
 
 export default Login;
+
