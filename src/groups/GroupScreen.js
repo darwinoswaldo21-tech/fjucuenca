@@ -159,12 +159,24 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
       return;
     }
 
+    // Allow 0 (e.g. shorts/intro) but default to 1 when the input is empty.
+    const seasonValue = String(season ?? '').trim() === '' ? 1 : Number(season);
+    const episodeValue = String(episodeNumber ?? '').trim() === '' ? 1 : Number(episodeNumber);
+    if (!Number.isFinite(seasonValue) || seasonValue < 0) {
+      setNote('Temporada invalida.');
+      return;
+    }
+    if (!Number.isFinite(episodeValue) || episodeValue < 0) {
+      setNote('Capitulo # invalido.');
+      return;
+    }
+
     setSaving(true);
     setNote(null);
     try {
       await addDoc(collection(db, 'groups', groupId, 'episodes'), {
-        season: Number(season) || 1,
-        episodeNumber: Number(episodeNumber) || 1,
+        season: seasonValue,
+        episodeNumber: episodeValue,
         title: title.trim(),
         youtubeId: yt,
         youtubeUrl: youtubeUrl.trim(),
@@ -175,7 +187,7 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
       setAdding(false);
       setTitle('');
       setYoutubeUrl('');
-      setEpisodeNumber(String((Number(episodeNumber) || 1) + 1));
+      setEpisodeNumber(String(episodeValue + 1));
     } catch (e) {
       setNote('No se pudo guardar el capitulo.');
     } finally {
@@ -294,7 +306,7 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
                         {saving ? 'Guardando...' : 'Guardar'}
                       </button>
                     </div>
-                    <div className="fju-gNote">Sugerencia: en YouTube pon el video como “No listado”.</div>
+                    <div className="fju-gNote">Sugerencia: en YouTube pon el video como â€œNo listadoâ€.</div>
                   </div>
                 )}
               </div>
@@ -314,7 +326,7 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
                     <div className="fju-epHead">
                       <div>
                         <p className="fju-epTitle">
-                          T{ep.season || 1} · E{ep.episodeNumber || 1} — {ep.title}
+                          T{ep.season ?? 1} Â· E{ep.episodeNumber ?? 1} â€” {ep.title}
                         </p>
                         <p className="fju-epMeta">SERIE DE DIOS</p>
                       </div>
@@ -385,3 +397,4 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
     </div>
   );
 }
+
