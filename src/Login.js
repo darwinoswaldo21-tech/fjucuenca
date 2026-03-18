@@ -69,7 +69,7 @@ function Login({ onRegister }) {
           <div
             className="fju-heroInner"
             style={{
-              '--fju-hero-img': `url("${process.env.PUBLIC_URL}/mi-bienvenida.jpg")`,
+              '--fju-hero-img': `url("${process.env.PUBLIC_URL}/mi-bienvenida.png")`,
             }}
           >
             <div className="fju-heroContent">
@@ -91,8 +91,6 @@ function Login({ onRegister }) {
                 <li className="fju-heroItem"><span className="fju-heroDot" /> Notificaciones</li>
               </ul>
             </div>
-
-            <div className="fju-heroArt" aria-hidden="true" />
 
             <div className="fju-heroFooter">
               <div>Unidos en Cristo. Comparte con amor.</div>
