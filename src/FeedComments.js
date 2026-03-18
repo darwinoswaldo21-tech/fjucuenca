@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { db, auth } from './firebase';
 import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 
-function FeedComments({ postId }) {
+function FeedComments({ postId, postAuthorId, postText }) {
   const [comentarios, setComentarios] = useState([]);
   const [texto, setTexto] = useState('');
   const [mostrar, setMostrar] = useState(false);
@@ -45,12 +45,34 @@ function FeedComments({ postId }) {
     const usuario = auth.currentUser;
     // FIX: usar nombreReal cargado desde Firestore
     const nombre = nombreReal || usuario.displayName || usuario.email?.split('@')[0] || 'Usuario';
+    const msg = texto.trim();
+
     await addDoc(collection(db, 'posts', postId, 'comments'), {
       texto: texto.trim(),
       uid: usuario.uid,
       displayName: nombre,
       createdAt: serverTimestamp(),
     });
+
+    // Notificacion in-app: si comentas un post de otra persona, avisamos al autor.
+    // Nota: esto es MVP (cliente). A futuro lo ideal es hacerlo con Cloud Functions.
+    try {
+      if (postAuthorId && postAuthorId !== usuario.uid) {
+        await addDoc(collection(db, 'notifications', postAuthorId, 'items'), {
+          type: 'comment',
+          read: false,
+          createdAt: serverTimestamp(),
+          fromUid: usuario.uid,
+          fromName: nombre,
+          postId,
+          title: 'Nuevo comentario',
+          body: `${nombre}: ${msg.slice(0, 140)}`,
+          postText: (postText || '').slice(0, 140),
+        });
+      }
+    } catch (e) {
+      // Best-effort: el comentario no debe fallar si la notificacion falla.
+    }
     setTexto('');
   };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { db, auth } from './firebase';
-import { collection, addDoc, getDocs, onSnapshot, orderBy, query, where, doc, deleteDoc, limit, startAfter } from 'firebase/firestore';
+import { collection, addDoc, getDocs, onSnapshot, orderBy, query, where, doc, deleteDoc, limit, startAfter, updateDoc, serverTimestamp } from 'firebase/firestore';
 import FeedComments from './FeedComments';
 import './FeedPro.css';
 
@@ -23,6 +23,11 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
   const [mensajesPrivado, setMensajesPrivado] = useState([]);
   const [nuevoMsg, setNuevoMsg] = useState('');
   const bottomRef = useRef(null);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifTab, setNotifTab] = useState('new'); // 'new' | 'old'
+  const [notifs, setNotifs] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [focusPostId, setFocusPostId] = useState(null);
 
   // Si existen handlers, el navbar navega a pantallas separadas y no necesitamos listeners inline.
   const inlineChat = !onChat;
@@ -55,6 +60,75 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
     });
     return () => unsub();
   }, [PAGE_SIZE, loadedMoreOnce]);
+
+  useEffect(() => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return undefined;
+
+    const q = query(collection(db, 'notifications', uid, 'items'), orderBy('createdAt', 'desc'), limit(40));
+    const unsub = onSnapshot(q, (snap) => {
+      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setNotifs(list);
+      setUnreadCount(list.filter((n) => !n.read).length);
+    });
+    return () => unsub();
+  }, []);
+
+  const markNotifRead = async (n) => {
+    const uid = auth.currentUser?.uid;
+    if (!uid || !n?.id) return;
+    if (n.read) return;
+    try {
+      await updateDoc(doc(db, 'notifications', uid, 'items', n.id), {
+        read: true,
+        readAt: serverTimestamp(),
+      });
+    } catch (e) {
+      // best-effort
+    }
+  };
+
+  const markAllRead = async () => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    const unread = notifs.filter((n) => !n.read);
+    if (unread.length === 0) return;
+    try {
+      await Promise.all(
+        unread.map((n) => updateDoc(doc(db, 'notifications', uid, 'items', n.id), { read: true, readAt: serverTimestamp() }))
+      );
+    } catch (e) {
+      // best-effort
+    }
+  };
+
+  const openNotif = () => {
+    setNotifOpen((v) => !v);
+    setNotifTab('new');
+  };
+
+  const goToPost = (postId) => {
+    if (!postId) return;
+    setVista('feed');
+    setFocusPostId(postId);
+    setNotifOpen(false);
+
+    setTimeout(() => {
+      const el = document.getElementById(`post-${postId}`);
+      if (el?.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => setFocusPostId(null), 2500);
+    }, 120);
+  };
+
+  const fmtNotifTime = (n) => {
+    try {
+      const d = n?.createdAt?.toDate ? n.createdAt.toDate() : null;
+      if (!d) return '';
+      return d.toLocaleString('es-EC', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    } catch (e) {
+      return '';
+    }
+  };
 
   const cargarMas = async () => {
     if (!cursorDoc || loadingMore || !hasMore) return;
@@ -245,6 +319,103 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
           </button>
                     <button onClick={onMedias} className="fju-chip fju-chipPrimary" type="button">Medios</button>
           <button onClick={onGroups} className="fju-chip fju-chipPrimary" type="button">Grupos</button>
+
+          {/* Notificaciones (in-app) */}
+          <div style={{ position: 'relative' }}>
+            <button
+              onClick={openNotif}
+              className={`fju-chip ${notifOpen ? 'fju-chipActive' : ''}`}
+              type="button"
+              style={{ position: 'relative', padding: '8px 12px' }}
+              aria-label="Notificaciones"
+            >
+              🔔
+              {unreadCount > 0 && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: -6,
+                    right: -6,
+                    background: '#dc2626',
+                    color: 'white',
+                    borderRadius: 999,
+                    padding: '2px 6px',
+                    fontSize: 11,
+                    fontWeight: 800,
+                    lineHeight: 1,
+                    border: '2px solid white',
+                  }}
+                >
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+
+            {notifOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  right: 0,
+                  top: 'calc(100% + 10px)',
+                  width: 340,
+                  maxWidth: '85vw',
+                  background: 'white',
+                  borderRadius: 18,
+                  boxShadow: '0 24px 80px rgba(0,0,0,0.22)',
+                  border: '1px solid rgba(0,0,0,0.08)',
+                  overflow: 'hidden',
+                  zIndex: 200,
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', borderBottom: '1px solid #eee' }}>
+                  <div style={{ fontWeight: 900, color: '#1B2A6B' }}>Notificaciones</div>
+                  <button onClick={markAllRead} className="fju-chip" type="button">Marcar leido</button>
+                </div>
+
+                <div style={{ display: 'flex', gap: 8, padding: '10px 12px', borderBottom: '1px solid #f3f3f3' }}>
+                  <button onClick={() => setNotifTab('new')} className={`fju-chip ${notifTab === 'new' ? 'fju-chipActive' : ''}`} type="button">Nuevas</button>
+                  <button onClick={() => setNotifTab('old')} className={`fju-chip ${notifTab === 'old' ? 'fju-chipActive' : ''}`} type="button">Anteriores</button>
+                </div>
+
+                <div style={{ maxHeight: 380, overflowY: 'auto', padding: 10, background: '#fafafa' }}>
+                  {notifs.filter((n) => (notifTab === 'new' ? !n.read : !!n.read)).length === 0 && (
+                    <div style={{ color: '#777', fontSize: 13, padding: 12, textAlign: 'center' }}>
+                      No hay notificaciones.
+                    </div>
+                  )}
+                  {notifs
+                    .filter((n) => (notifTab === 'new' ? !n.read : !!n.read))
+                    .map((n) => (
+                      <div
+                        key={n.id}
+                        onClick={() => {
+                          markNotifRead(n);
+                          if (n.postId) goToPost(n.postId);
+                          else setNotifOpen(false);
+                        }}
+                        style={{
+                          background: 'white',
+                          borderRadius: 14,
+                          padding: '10px 12px',
+                          marginBottom: 8,
+                          border: '1px solid rgba(0,0,0,0.06)',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'baseline' }}>
+                          <div style={{ fontWeight: 900, color: '#1B2A6B', fontSize: 13.5 }}>
+                            {n.title || 'Notificacion'}
+                          </div>
+                          <div style={{ fontSize: 11, color: '#888', whiteSpace: 'nowrap' }}>{fmtNotifTime(n)}</div>
+                        </div>
+                        {n.body && <div style={{ fontSize: 12.5, color: '#444', marginTop: 4, lineHeight: 1.35 }}>{n.body}</div>}
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           {onAdmin && (
             <button onClick={onAdmin} className="fju-chip fju-chipAdmin" type="button">Admin</button>
           )}
@@ -287,7 +458,16 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
             </div>
           )}
           {visiblePosts.map(post => (
-            <div key={post.id} className="fju-card" style={{padding:'16px',marginBottom:'12px'}}>
+            <div
+              key={post.id}
+              id={`post-${post.id}`}
+              className="fju-card"
+              style={{
+                padding:'16px',
+                marginBottom:'12px',
+                outline: focusPostId === post.id ? '3px solid rgba(245,166,35,0.45)' : 'none'
+              }}
+            >
               <div style={{display:'flex',alignItems:'center',gap:'12px',marginBottom:'12px'}}>
                 <div className="fju-avatar" style={{width:'40px',height:'40px',borderRadius:'50%'}}>
                   {post.autor.charAt(0).toUpperCase()}
@@ -339,7 +519,7 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
                   style={{width:'100%',borderRadius:12,marginTop:12,maxHeight:400}}
                 />
               )}
-              <FeedComments postId={post.id} />
+              <FeedComments postId={post.id} postAuthorId={post.autorId} postText={post.texto} />
             </div>
           ))}
 
