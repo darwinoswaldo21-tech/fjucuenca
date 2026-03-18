@@ -66,7 +66,12 @@ function Login({ onRegister }) {
 
       <div className="fju-authGrid">
         <div className="fju-hero">
-          <div className="fju-heroInner">
+          <div
+            className="fju-heroInner"
+            style={{
+              '--fju-hero-img': `url("${process.env.PUBLIC_URL}/mi-bienvenida.jpg")`,
+            }}
+          >
             <div className="fju-heroContent">
               <div className="fju-heroBadge">
                 <span className="fju-heroMark">F</span>
@@ -152,4 +157,3 @@ function Login({ onRegister }) {
 }
 
 export default Login;
-

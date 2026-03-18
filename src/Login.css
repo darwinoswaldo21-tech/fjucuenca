@@ -49,7 +49,7 @@
   position: absolute;
   inset: 0;
   opacity: 0.18;
-  background-image: url("/fondo1.jpg");
+  background-image: var(--fju-hero-img);
   background-size: cover;
   background-position: center;
   filter: saturate(1.1) contrast(1.05);
@@ -328,4 +328,3 @@
     grid-template-columns: 1fr;
   }
 }
-
