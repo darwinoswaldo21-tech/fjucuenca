@@ -3,6 +3,7 @@ import { auth, db } from '../firebase';
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   onSnapshot,
   serverTimestamp,
@@ -123,6 +124,31 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
       role: 'member',
       approvedAt: serverTimestamp(),
     });
+  };
+
+  const canDeleteEntry = (ep) => {
+    if (!ep) return false;
+    if (canModerate) return true;
+    if (group?.createdBy && group.createdBy === currentUid) return true;
+    if (ep.createdBy && ep.createdBy === currentUid) return true;
+    return false;
+  };
+
+  const borrarVideo = async (ep) => {
+    if (!groupId || !ep?.id) return;
+    if (!canDeleteEntry(ep)) return;
+    // Keep confirm message simple and ASCII-friendly.
+    // eslint-disable-next-line no-alert
+    const ok = window.confirm(`Borrar este video?\n\n${ep.title || ''}`);
+    if (!ok) return;
+
+    setNote(null);
+    try {
+      await deleteDoc(doc(db, 'groups', groupId, 'episodes', ep.id));
+      setNote('Video borrado.');
+    } catch (e) {
+      setNote('No se pudo borrar el video.');
+    }
   };
 
   const saveGroup = async () => {
@@ -407,6 +433,10 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
                         </p>
                         <p className="fju-epMeta">SERIE DE DIOS</p>
                       </div>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        {canDeleteEntry(ep) && (
+                          <button className="fju-gDanger" onClick={() => borrarVideo(ep)} type="button">Borrar</button>
+                        )}
                       {canOpenExternal && (
                         <a
                           className="fju-gBtn"
@@ -418,6 +448,7 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
                           Abrir
                         </a>
                       )}
+                      </div>
                     </div>
                     <iframe
                       className="fju-epFrame"
@@ -487,6 +518,10 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
                         <p className="fju-epTitle">{ep.title}</p>
                         <p className="fju-epMeta">EXTRA</p>
                       </div>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        {canDeleteEntry(ep) && (
+                          <button className="fju-gDanger" onClick={() => borrarVideo(ep)} type="button">Borrar</button>
+                        )}
                       {canOpenExternal && (
                         <a
                           className="fju-gBtn"
@@ -498,6 +533,7 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
                           Abrir
                         </a>
                       )}
+                      </div>
                     </div>
                     <iframe
                       className="fju-epFrame"
