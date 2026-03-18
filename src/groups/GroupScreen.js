@@ -199,6 +199,7 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
 
   const groupTitle = group?.name || 'Grupo';
   const groupDesc = group?.description || '';
+  const canOpenExternal = !!group && (canModerate || group.createdBy === currentUid);
 
   return (
     <div className="fju-groups">
@@ -317,15 +318,17 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
                         </p>
                         <p className="fju-epMeta">SERIE DE DIOS</p>
                       </div>
-                      <a
-                        className="fju-gBtn"
-                        href={ep.youtubeUrl || `https://youtu.be/${ep.youtubeId}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{ textDecoration: 'none' }}
-                      >
-                        Abrir
-                      </a>
+                      {canOpenExternal && (
+                        <a
+                          className="fju-gBtn"
+                          href={ep.youtubeUrl || `https://youtu.be/${ep.youtubeId}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ textDecoration: 'none' }}
+                        >
+                          Abrir
+                        </a>
+                      )}
                     </div>
                     <iframe
                       className="fju-epFrame"
