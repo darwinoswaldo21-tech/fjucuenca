@@ -1,0 +1,247 @@
+.fju-messenger {
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 800px at 20% 10%, rgba(245, 166, 35, 0.18), transparent 55%),
+    radial-gradient(900px 700px at 80% 0%, rgba(61, 90, 153, 0.32), transparent 60%),
+    linear-gradient(180deg, #0b1020, #0f1b3a);
+  font-family: "Space Grotesk", "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.fju-msTop {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding: 10px 14px;
+  backdrop-filter: blur(14px);
+  background: rgba(15, 27, 58, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fju-msTopInner {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fju-msTitle {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.fju-msBack {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+  padding: 7px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.fju-msShell {
+  max-width: 1080px;
+  margin: 14px auto 30px;
+  padding: 0 14px;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 12px;
+}
+
+.fju-msPanel {
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.fju-msSearch {
+  padding: 12px;
+  border-bottom: 1px solid rgba(12, 18, 34, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.70));
+}
+
+.fju-msSearch input {
+  width: 100%;
+  padding: 10px 11px;
+  border-radius: 12px;
+  border: 1px solid rgba(12, 18, 34, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+  outline: none;
+  font-size: 13.5px;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.fju-msList {
+  max-height: calc(100vh - 170px);
+  overflow: auto;
+}
+
+.fju-msUser {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(12, 18, 34, 0.06);
+  transition: background 120ms ease;
+}
+
+.fju-msUser:hover { background: rgba(27, 42, 107, 0.06); }
+.fju-msUserActive { background: rgba(245, 166, 35, 0.10); }
+
+.fju-msAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1b2a6b, #3d5a99);
+  color: white;
+  font-weight: 700;
+}
+
+.fju-msMeta { flex: 1; min-width: 0; }
+.fju-msName {
+  margin: 0;
+  font-weight: 700;
+  color: #1b2a6b;
+  font-size: 13.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fju-msRole {
+  margin: 0;
+  color: rgba(12, 18, 34, 0.55);
+  font-size: 11.5px;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.fju-msDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(12, 18, 34, 0.18);
+}
+
+.fju-msDotOn {
+  background: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.18);
+}
+
+.fju-msChat {
+  display: flex;
+  flex-direction: column;
+  min-height: 520px;
+}
+
+.fju-msChatHead {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(12, 18, 34, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.70));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fju-msChatHead h3 {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #1b2a6b;
+}
+
+.fju-msChatBody {
+  flex: 1;
+  overflow: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.fju-msBubbleRow {
+  display: flex;
+}
+
+.fju-msBubbleRowMe { justify-content: flex-end; }
+.fju-msBubbleRowOther { justify-content: flex-start; }
+
+.fju-msBubble {
+  max-width: 72%;
+  padding: 9px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.35;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.fju-msBubbleMe {
+  background: linear-gradient(135deg, #1b2a6b, #3d5a99);
+  color: white;
+  border-bottom-right-radius: 6px;
+}
+
+.fju-msBubbleOther {
+  background: white;
+  color: rgba(12, 18, 34, 0.92);
+  border-bottom-left-radius: 6px;
+}
+
+.fju-msComposer {
+  padding: 12px;
+  border-top: 1px solid rgba(12, 18, 34, 0.08);
+  background: rgba(255, 255, 255, 0.88);
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.fju-msComposer textarea {
+  flex: 1;
+  padding: 10px 11px;
+  border-radius: 12px;
+  border: 1px solid rgba(12, 18, 34, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+  outline: none;
+  font-size: 14px;
+  resize: none;
+  max-height: 120px;
+  min-height: 42px;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+.fju-msSend {
+  padding: 9px 14px;
+  border-radius: 12px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, #1b2a6b, #3d5a99);
+  box-shadow: 0 18px 40px rgba(27, 42, 107, 0.20);
+}
+
+.fju-msEmpty {
+  padding: 40px 16px;
+  text-align: center;
+  color: rgba(12, 18, 34, 0.55);
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+@media (max-width: 860px) {
+  .fju-msShell { grid-template-columns: 1fr; }
+  .fju-msList { max-height: 320px; }
+}
+

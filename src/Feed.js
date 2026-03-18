@@ -188,7 +188,7 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onChat, onChatPriv
           )}
           {onChatPrivado ? (
             <button onClick={onChatPrivado} className="fju-chip" type="button">
-              Privado
+              Mensajes
             </button>
           ) : (
             navBtn('privado', 'Privado')

@@ -7,11 +7,12 @@ import Register from './Register';
 import Feed from './Feed';
 import Admin from './Admin';
 import Chat from './Chat';
-import ChatPrivado from './ChatPrivado';
+import Messenger from './Messenger';
 import HelpScreen from './modules/help/HelpScreen';
 import HelpChatScreen from './modules/help/HelpChatScreen';
 import ResourcesScreen from './modules/help/ResourcesScreen';
 import MediaScreen from './modules/medios/MediaScreen';
+import { setPresenceOffline, setPresenceOnline } from './presence';
 
 function App() {
   const [pantalla, setPantalla] = useState('login');
@@ -88,6 +89,9 @@ function App() {
             setUsuario({ ...data, uid: user.uid, nombre: nombreFinal });
             setPantalla(data.rol === 'admin' ? 'admin' : 'feed');
 
+            // Presence (RTDB): no bloquea la app si falla.
+            setPresenceOnline(user.uid).catch(() => {});
+
           } else {
             // Si no existe doc, lo creamos para que el usuario no quede "loggeado pero fuera".
             const nombreFinal =
@@ -106,10 +110,10 @@ function App() {
             setUsuario(null);
             setPantalla('pendiente');
           }
-        } else {
-          setUsuario(null);
-          setPantalla('login');
-        }
+      } else {
+        setUsuario(null);
+        setPantalla('login');
+      }
       } catch (e) {
         console.log('Error cargando usuario:', e);
         setUsuario(null);
@@ -122,6 +126,10 @@ function App() {
   }, []);
 
   const handleLogout = async () => {
+    // Mark offline best-effort.
+    if (auth.currentUser?.uid) {
+      setPresenceOffline(auth.currentUser.uid).catch(() => {});
+    }
     await signOut(auth);
     setPantalla('login');
   };
@@ -158,7 +166,7 @@ function App() {
           onLogout={handleLogout}
           onAdmin={usuario.rol === 'admin' ? () => setPantalla('admin') : null}
           onChat={() => setPantalla('chat')}
-          onChatPrivado={() => setPantalla('chatPrivado')}
+          onChatPrivado={() => setPantalla('mensajes')}
           onHelp={() => setPantalla('help')}
           onMedias={() => setPantalla('medios')}
         />
@@ -169,8 +177,8 @@ function App() {
       {pantalla === 'chat' && usuario && (
         <Chat usuario={usuario} onBack={() => setPantalla('feed')} />
       )}
-      {pantalla === 'chatPrivado' && usuario && (
-        <ChatPrivado usuario={usuario} onBack={() => setPantalla('feed')} />
+      {pantalla === 'mensajes' && usuario && (
+        <Messenger usuario={usuario} onBack={() => setPantalla('feed')} />
       )}
       {pantalla === 'help' && usuario && (
         <HelpScreen
