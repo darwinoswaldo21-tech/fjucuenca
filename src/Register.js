@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth, db } from './firebase';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 
 const S = {
@@ -40,10 +40,20 @@ function Register({ onBack }) {
       await updateProfile(result.user, { displayName: nombre });
       await setDoc(doc(db, 'usuarios', result.user.uid), {
         nombre, email, rol:'miembro', aprobado:false,
-        fechaRegistro: new Date().toISOString()
+        emailVerificado: false,
+        fechaRegistro: new Date().toISOString(),
       });
-      mostrarNotif('Registro exitoso! El pastor revisara tu cuenta pronto.','exito');
-      setTimeout(() => onBack(), 5000);
+
+      // Enviar verificacion de correo (el usuario debe hacer click en el link).
+      try {
+        await sendEmailVerification(result.user);
+      } catch (e) {
+        // No bloquea el registro si falla el envio.
+        console.log('No se pudo enviar verificacion:', e);
+      }
+
+      mostrarNotif('Registro exitoso! Revisa tu correo y verifica tu email. Luego el admin aprobara tu cuenta.','exito');
+      setTimeout(() => onBack(), 6000);
     } catch (err) {
       mostrarNotif(err.message,'error');
     }
