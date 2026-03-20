@@ -22,6 +22,7 @@ function App() {
   const [cargando, setCargando] = useState(true);
   const [helpCategory, setHelpCategory] = useState(null);
   const [activeGroupId, setActiveGroupId] = useState(null);
+  const [revisandoAprobacion, setRevisandoAprobacion] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
@@ -58,8 +59,8 @@ function App() {
           if (snap.exists()) {
             data = snap.data();
 
-            // Verificar aprobado
-            if (data.aprobado === false) {
+            // Verificar aprobado (solo entra si aprobado === true)
+            if (data.aprobado !== true) {
               setUsuario(null);
               setPantalla('pendiente');
               return;
@@ -125,6 +126,46 @@ function App() {
     setPantalla('login');
   };
 
+  const handleRevisarAprobacion = async () => {
+    if (!auth.currentUser) return;
+    if (revisandoAprobacion) return;
+
+    setRevisandoAprobacion(true);
+    try {
+      const user = auth.currentUser;
+      const userRef = doc(db, 'usuarios', user.uid);
+      const snap = await getDoc(userRef);
+
+      if (!snap.exists()) {
+        alert('Tu perfil aun no existe. Intenta salir y entrar de nuevo.');
+        return;
+      }
+
+      const data = snap.data();
+      if (data.aprobado !== true) {
+        alert('Aun estas pendiente. Pidele al admin que te apruebe.');
+        return;
+      }
+
+      const nombreFinal = data.nombre && data.nombre.trim() !== ''
+        ? data.nombre
+        : user.displayName || user.email?.split('@')[0] || 'Usuario';
+
+      if (!data.nombre || data.nombre.trim() === '') {
+        try {
+          await updateDoc(doc(db, 'usuarios', user.uid), { nombre: nombreFinal });
+        } catch (e) {}
+      }
+
+      setUsuario({ ...data, uid: user.uid, nombre: nombreFinal });
+      setPantalla(data.rol === 'admin' ? 'admin' : 'feed');
+    } catch (e) {
+      alert('No se pudo revisar: ' + (e?.message || 'Error'));
+    } finally {
+      setRevisandoAprobacion(false);
+    }
+  };
+
   if (cargando) return (
     <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh',background:'#1B2A6B',color:'white',fontSize:'18px'}}>
       Cargando FJU...
@@ -145,6 +186,9 @@ function App() {
             <p style={{fontSize:'44px',margin:'0 0 12px',letterSpacing:'2px',fontWeight:'800',color:'#B8860B'}}>PENDIENTE</p>
             <h2 style={{color:'#1B2A6B',margin:'0 0 8px'}}>Cuenta pendiente</h2>
             <p style={{color:'#666',fontSize:'14px',margin:'0 0 20px'}}>Tu cuenta esta siendo revisada por el administrador. Te avisaran pronto.</p>
+            <button onClick={handleRevisarAprobacion} disabled={revisandoAprobacion} style={{width:'100%',padding:'12px 16px',background:revisandoAprobacion?'#888':'#1B2A6B',color:'white',border:'none',borderRadius:'12px',cursor:revisandoAprobacion?'not-allowed':'pointer',fontWeight:'800',marginBottom:'10px'}}>
+              {revisandoAprobacion ? 'Revisando...' : 'Ya me aprobaron (revisar)'}
+            </button>
             <button onClick={handleLogout} style={{padding:'12px 24px',background:'#1B2A6B',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'600'}}>
               Volver al inicio
             </button>
