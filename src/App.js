@@ -22,7 +22,6 @@ function App() {
   const [cargando, setCargando] = useState(true);
   const [helpCategory, setHelpCategory] = useState(null);
   const [activeGroupId, setActiveGroupId] = useState(null);
-  const [revisandoAprobacion, setRevisandoAprobacion] = useState(false);
   const [emailPendiente, setEmailPendiente] = useState(null);
 
   useEffect(() => {
@@ -172,41 +171,20 @@ function App() {
         return;
       }
       setEmailPendiente(null);
-      // Re-evaluar aprobado
-      await handleRevisarAprobacion();
-    } catch (e) {
-      alert('No se pudo verificar el estado: ' + (e?.message || 'Error'));
-    }
-  };
 
-  const handleRevisarAprobacion = async () => {
-    if (!auth.currentUser) return;
-    if (revisandoAprobacion) return;
-
-    setRevisandoAprobacion(true);
-    try {
+      // Re-evaluar aprobado: si ya esta aprobado entra, si no queda pendiente.
       const user = auth.currentUser;
-
-      // Si aun no verifico email, mandarlo a esa pantalla.
-      try { await user.reload(); } catch (e) {}
-      if (!user.emailVerified) {
-        setUsuario(null);
-        setEmailPendiente(user.email || null);
-        setPantalla('verificarEmail');
-        return;
-      }
-
       const userRef = doc(db, 'usuarios', user.uid);
       const snap = await getDoc(userRef);
-
       if (!snap.exists()) {
-        alert('Tu perfil aun no existe. Intenta salir y entrar de nuevo.');
+        setPantalla('pendiente');
         return;
       }
 
       const data = snap.data();
       if (data.aprobado !== true) {
-        alert('Aun estas pendiente. Pidele al admin que te apruebe.');
+        setUsuario(null);
+        setPantalla('pendiente');
         return;
       }
 
@@ -214,18 +192,10 @@ function App() {
         ? data.nombre
         : user.displayName || user.email?.split('@')[0] || 'Usuario';
 
-      if (!data.nombre || data.nombre.trim() === '') {
-        try {
-          await updateDoc(doc(db, 'usuarios', user.uid), { nombre: nombreFinal });
-        } catch (e) {}
-      }
-
       setUsuario({ ...data, uid: user.uid, nombre: nombreFinal });
       setPantalla(data.rol === 'admin' ? 'admin' : 'feed');
     } catch (e) {
-      alert('No se pudo revisar: ' + (e?.message || 'Error'));
-    } finally {
-      setRevisandoAprobacion(false);
+      alert('No se pudo verificar el estado: ' + (e?.message || 'Error'));
     }
   };
 
@@ -271,10 +241,7 @@ function App() {
           <div style={{background:'white',borderRadius:'24px',padding:'40px',maxWidth:'400px',textAlign:'center',boxShadow:'0 24px 80px rgba(0,0,0,0.4)'}}>
             <p style={{fontSize:'44px',margin:'0 0 12px',letterSpacing:'2px',fontWeight:'800',color:'#B8860B'}}>PENDIENTE</p>
             <h2 style={{color:'#1B2A6B',margin:'0 0 8px'}}>Cuenta pendiente</h2>
-            <p style={{color:'#666',fontSize:'14px',margin:'0 0 20px'}}>Tu cuenta esta siendo revisada por el administrador. Te avisaran pronto.</p>
-            <button onClick={handleRevisarAprobacion} disabled={revisandoAprobacion} style={{width:'100%',padding:'12px 16px',background:revisandoAprobacion?'#888':'#1B2A6B',color:'white',border:'none',borderRadius:'12px',cursor:revisandoAprobacion?'not-allowed':'pointer',fontWeight:'800',marginBottom:'10px'}}>
-              {revisandoAprobacion ? 'Revisando...' : 'Ya me aprobaron (revisar)'}
-            </button>
+            <p style={{color:'#666',fontSize:'14px',margin:'0 0 20px'}}>Falta que el admin apruebe tu cuenta para que puedas ingresar.</p>
             <button onClick={handleLogout} style={{padding:'12px 24px',background:'#1B2A6B',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'600'}}>
               Volver al inicio
             </button>
