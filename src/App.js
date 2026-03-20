@@ -167,7 +167,7 @@ function App() {
         <Feed
           usuario={usuario}
           onLogout={handleLogout}
-          onAdmin={usuario.rol === 'admin' ? () => setPantalla('admin') : null}
+          onAdmin={(usuario.rol === 'admin' || usuario.rol === 'moderador') ? () => setPantalla('admin') : null}
           onChat={() => setPantalla('chat')}
           onChatPrivado={() => setPantalla('mensajes')}
           onHelp={() => setPantalla('help')}
