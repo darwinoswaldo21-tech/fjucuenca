@@ -24,6 +24,9 @@ function App() {
   const [activeGroupId, setActiveGroupId] = useState(null);
   const [emailPendiente, setEmailPendiente] = useState(null);
 
+  const ADMIN_WA_PHONE = process.env.REACT_APP_ADMIN_WA_PHONE || '';
+  const ADMIN_WA_NAME = process.env.REACT_APP_ADMIN_WA_NAME || 'admin';
+
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       try {
@@ -183,6 +186,32 @@ function App() {
     }
   };
 
+  const buildAdminWhatsAppLink = (motivo) => {
+    if (!ADMIN_WA_PHONE) return null;
+
+    const u = auth.currentUser;
+    const nombre = (u?.displayName || '').trim() || 'Usuario';
+    const email = u?.email || '(sin email)';
+    const uid = u?.uid || '(sin uid)';
+
+    const msg =
+      `Hola ${ADMIN_WA_NAME}, soy ${nombre}. ` +
+      `Mi correo es ${email}. ` +
+      `Motivo: ${motivo}. ` +
+      `UID: ${uid}.`;
+
+    return `https://wa.me/${ADMIN_WA_PHONE}?text=${encodeURIComponent(msg)}`;
+  };
+
+  const handleAvisarAdmin = (motivo) => {
+    const link = buildAdminWhatsAppLink(motivo);
+    if (!link) {
+      alert('Falta configurar el WhatsApp del admin (REACT_APP_ADMIN_WA_PHONE).');
+      return;
+    }
+    window.open(link, '_blank', 'noopener,noreferrer');
+  };
+
   const handleYaVerifique = async () => {
     if (!auth.currentUser) return;
     try {
@@ -247,6 +276,9 @@ function App() {
               <button onClick={handleYaVerifique} style={{padding:'12px 18px',background:'white',color:'#1B2A6B',border:'2px solid #1B2A6B',borderRadius:'12px',cursor:'pointer',fontWeight:'700'}}>
                 Ya verifique
               </button>
+              <button onClick={() => handleAvisarAdmin('No me llega el correo / necesito ayuda para verificar')} style={{padding:'12px 18px',background:'#25D366',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'800'}}>
+                Avisar al admin (WhatsApp)
+              </button>
               <button onClick={handleLogout} style={{padding:'12px 18px',background:'transparent',color:'#666',border:'2px solid #ddd',borderRadius:'12px',cursor:'pointer',fontWeight:'700'}}>
                 Salir
               </button>
@@ -263,6 +295,9 @@ function App() {
             <p style={{fontSize:'44px',margin:'0 0 12px',letterSpacing:'2px',fontWeight:'800',color:'#B8860B'}}>PENDIENTE</p>
             <h2 style={{color:'#1B2A6B',margin:'0 0 8px'}}>Cuenta pendiente</h2>
             <p style={{color:'#666',fontSize:'14px',margin:'0 0 20px'}}>Tu cuenta esta siendo revisada por el administrador. Te avisaran pronto.</p>
+            <button onClick={() => handleAvisarAdmin('Ya verifique mi correo y necesito aprobacion')} style={{width:'100%',padding:'12px 16px',background:'#25D366',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'800',marginBottom:'10px'}}>
+              Avisar al admin (WhatsApp)
+            </button>
             <button onClick={handleLogout} style={{padding:'12px 24px',background:'#1B2A6B',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'600'}}>
               Volver al inicio
             </button>
