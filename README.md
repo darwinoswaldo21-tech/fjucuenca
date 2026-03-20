@@ -1,19 +1,34 @@
-touch index.html
-touch index.html
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FJU Cuenca</title>
-</head>
-<body>
-  <h1>¡Bienvenido a FJU Cuenca!</h1>
-  <p>Red social de la Federación de Juventudes Unidas de Cuenca.</p>
-</body>
-</html>git add .
-git commit -m "Primera pagina FJU Cuenca"
-git add .
-    
-    # fjucuenca
-Red social de la FJU Cuenca
+# FJU Cuenca
+
+Red social para la comunidad FJU (Federacion de Juventudes Unidas) de Cuenca.
+
+## Requisitos
+
+- Node.js + npm
+
+## Correr en local
+
+```bash
+npm install
+npm start
+```
+
+## Variables de entorno (opcional)
+
+Estas variables habilitan el boton "Avisar al admin (WhatsApp)" en las pantallas:
+
+- Verifica tu correo
+- Cuenta pendiente
+
+En local crea un archivo `.env` (no se sube al repo) y agrega:
+
+```bash
+REACT_APP_ADMIN_WA_PHONE=5939XXXXXXXX
+REACT_APP_ADMIN_WA_NAME=Pastor
+```
+
+Notas:
+
+- `REACT_APP_ADMIN_WA_PHONE` debe ir sin `+` y sin espacios (formato internacional).
+- En Vercel: Project Settings -> Environment Variables.
+
