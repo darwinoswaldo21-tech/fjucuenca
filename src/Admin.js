@@ -222,16 +222,15 @@ function Admin({ usuario, onLogout, onFeed }) {
                   <option value="admin">Admin</option>
                 </select>
                 <span style={{background:u.emailVerificado?'#d4edda':'#fff3cd',color:u.emailVerificado?'#155724':'#856404',padding:'4px 10px',borderRadius:'20px',fontSize:'12px',fontWeight:'700'}}>
-                  {u.emailVerificado ? 'Email verificado' : 'Email no verificado'}
+                  {u.emailVerificado ? 'Email verificado' : 'Email (pendiente de sync)'}
                 </span>
                 {!u.aprobado && (
                   <button
                     onClick={()=>aprobarUsuario(u.id)}
-                    disabled={!u.emailVerificado}
-                    style={{padding:'8px 16px',background:!u.emailVerificado?'#999':'#1B2A6B',color:'white',border:'none',borderRadius:'8px',cursor:!u.emailVerificado?'not-allowed':'pointer',fontSize:'13px',fontWeight:'600',opacity:!u.emailVerificado?0.75:1}}
-                    title={!u.emailVerificado ? 'El usuario debe verificar su correo primero' : 'Aprobar usuario'}
+                    style={{padding:'8px 16px',background:'#1B2A6B',color:'white',border:'none',borderRadius:'8px',cursor:'pointer',fontSize:'13px',fontWeight:'600'}}
+                    title="Aprobar usuario"
                   >
-                    {u.emailVerificado ? 'Aprobar' : 'Falta verificar email'}
+                    Aprobar
                   </button>
                 )}
                 {u.aprobado && <span style={{background:'#d4edda',color:'#155724',padding:'4px 10px',borderRadius:'20px',fontSize:'12px',fontWeight:'600'}}>Activo</span>}
