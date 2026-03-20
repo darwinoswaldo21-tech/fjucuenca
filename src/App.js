@@ -23,6 +23,7 @@ function App() {
   const [helpCategory, setHelpCategory] = useState(null);
   const [activeGroupId, setActiveGroupId] = useState(null);
   const [emailPendiente, setEmailPendiente] = useState(null);
+  const [revisandoPendiente, setRevisandoPendiente] = useState(false);
 
   const ADMIN_WA_PHONE = process.env.REACT_APP_ADMIN_WA_PHONE || '';
   const ADMIN_WA_NAME = process.env.REACT_APP_ADMIN_WA_NAME || 'admin';
@@ -253,6 +254,54 @@ function App() {
     }
   };
 
+  const handleRevisarAprobacion = async () => {
+    if (!auth.currentUser) return;
+    if (revisandoPendiente) return;
+
+    setRevisandoPendiente(true);
+    try {
+      await auth.currentUser.reload();
+
+      if (!auth.currentUser.emailVerified) {
+        setUsuario(null);
+        setEmailPendiente(auth.currentUser.email || null);
+        setPantalla('verificarEmail');
+        return;
+      }
+
+      const user = auth.currentUser;
+      const userRef = doc(db, 'usuarios', user.uid);
+      const snap = await getDoc(userRef);
+
+      if (!snap.exists()) {
+        alert('Tu perfil aun no existe en la base. Intenta salir y entrar de nuevo.');
+        return;
+      }
+
+      const data = snap.data();
+
+      // Best-effort: marcar email verificado en Firestore.
+      try { await updateDoc(doc(db, 'usuarios', user.uid), { emailVerificado: true }); } catch (e) {}
+
+      if (data.aprobado === false) {
+        alert('Aun estas pendiente de aprobacion. Si ya avisaste al admin, espera un momento y vuelve a intentar.');
+        return;
+      }
+
+      const nombreFinal = data.nombre && data.nombre.trim() !== ''
+        ? data.nombre
+        : user.displayName || user.email?.split('@')[0] || 'Usuario';
+
+      setEmailPendiente(null);
+      setUsuario({ ...data, uid: user.uid, nombre: nombreFinal, emailVerificado: true });
+      setPantalla(data.rol === 'admin' ? 'admin' : 'feed');
+    } catch (e) {
+      alert('No se pudo revisar el estado: ' + (e?.message || 'Error'));
+    } finally {
+      setRevisandoPendiente(false);
+    }
+  };
+
   return (
     <div>
       {pantalla === 'login' && (
@@ -295,6 +344,9 @@ function App() {
             <p style={{fontSize:'44px',margin:'0 0 12px',letterSpacing:'2px',fontWeight:'800',color:'#B8860B'}}>PENDIENTE</p>
             <h2 style={{color:'#1B2A6B',margin:'0 0 8px'}}>Cuenta pendiente</h2>
             <p style={{color:'#666',fontSize:'14px',margin:'0 0 20px'}}>Tu cuenta esta siendo revisada por el administrador. Te avisaran pronto.</p>
+            <button onClick={handleRevisarAprobacion} disabled={revisandoPendiente} style={{width:'100%',padding:'12px 16px',background:revisandoPendiente?'#888':'#1B2A6B',color:'white',border:'none',borderRadius:'12px',cursor:revisandoPendiente?'not-allowed':'pointer',fontWeight:'800',marginBottom:'10px'}}>
+              {revisandoPendiente ? 'Revisando...' : 'Ya me aprobaron (revisar)'}
+            </button>
             <button onClick={() => handleAvisarAdmin('Ya verifique mi correo y necesito aprobacion')} style={{width:'100%',padding:'12px 16px',background:'#25D366',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'800',marginBottom:'10px'}}>
               Avisar al admin (WhatsApp)
             </button>
