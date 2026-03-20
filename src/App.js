@@ -24,6 +24,7 @@ function App() {
   const [activeGroupId, setActiveGroupId] = useState(null);
   const [emailPendiente, setEmailPendiente] = useState(null);
   const [revisandoPendiente, setRevisandoPendiente] = useState(false);
+  const [perfilError, setPerfilError] = useState(null);
 
   const ADMIN_WA_PHONE = process.env.REACT_APP_ADMIN_WA_PHONE || '';
   const ADMIN_WA_NAME = process.env.REACT_APP_ADMIN_WA_NAME || 'admin';
@@ -32,6 +33,7 @@ function App() {
     const unsub = onAuthStateChanged(auth, async (user) => {
       try {
         if (user) {
+          setPerfilError(null);
           // Asegura que emailVerified este actualizado.
           try {
             await user.reload();
@@ -147,13 +149,24 @@ function App() {
       } else {
         setUsuario(null);
         setEmailPendiente(null);
+        setPerfilError(null);
         setPantalla('login');
       }
       } catch (e) {
         console.log('Error cargando usuario:', e);
-        setUsuario(null);
-        setEmailPendiente(null);
-        setPantalla('login');
+
+        // Si el login fue OK pero fallo cargar Firestore, no lo mandamos a Login silenciosamente.
+        if (auth.currentUser) {
+          setUsuario(null);
+          setEmailPendiente(null);
+          setPerfilError(e?.message || String(e));
+          setPantalla('errorPerfil');
+        } else {
+          setUsuario(null);
+          setEmailPendiente(null);
+          setPerfilError(null);
+          setPantalla('login');
+        }
       } finally {
         setCargando(false);
       }
@@ -168,6 +181,7 @@ function App() {
     }
     await signOut(auth);
     setEmailPendiente(null);
+    setPerfilError(null);
     setPantalla('login');
   };
 
@@ -309,6 +323,32 @@ function App() {
       )}
       {pantalla === 'register' && (
         <Register onBack={() => setPantalla('login')} />
+      )}
+      {pantalla === 'errorPerfil' && (
+        <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh',background:'linear-gradient(135deg,#1B2A6B,#0D1533)',flexDirection:'column',gap:'16px',padding:'20px'}}>
+          <div style={{background:'white',borderRadius:'24px',padding:'40px',maxWidth:'520px',textAlign:'center',boxShadow:'0 24px 80px rgba(0,0,0,0.4)'}}>
+            <h2 style={{color:'#1B2A6B',margin:'0 0 10px'}}>Error cargando tu perfil</h2>
+            <p style={{color:'#666',fontSize:'14px',margin:'0 0 18px',lineHeight:'1.6'}}>
+              La sesion se inicio, pero hubo un problema leyendo tu informacion en Firestore.
+            </p>
+            {perfilError && (
+              <div style={{background:'#fff3cd',border:'1px solid #ffeeba',borderRadius:'12px',padding:'12px',textAlign:'left',fontSize:'12px',color:'#856404',marginBottom:'16px',whiteSpace:'pre-wrap'}}>
+                {perfilError}
+              </div>
+            )}
+            <div style={{display:'flex',gap:'10px',justifyContent:'center',flexWrap:'wrap'}}>
+              <button onClick={handleRevisarAprobacion} style={{padding:'12px 18px',background:'#1B2A6B',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'800'}}>
+                Reintentar
+              </button>
+              <button onClick={() => handleAvisarAdmin('No puedo entrar: error cargando perfil')} style={{padding:'12px 18px',background:'#25D366',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'800'}}>
+                Avisar al admin (WhatsApp)
+              </button>
+              <button onClick={handleLogout} style={{padding:'12px 18px',background:'transparent',color:'#666',border:'2px solid #ddd',borderRadius:'12px',cursor:'pointer',fontWeight:'800'}}>
+                Salir
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       {pantalla === 'verificarEmail' && (
         <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh',background:'linear-gradient(135deg,#1B2A6B,#0D1533)',flexDirection:'column',gap:'16px',padding:'20px'}}>
