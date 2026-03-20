@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth, db } from './firebase';
-import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification, signOut, updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 
 const S = {
@@ -50,8 +50,11 @@ function Register({ onBack }) {
         console.log('No se pudo enviar verificacion:', e);
       }
 
-      mostrarNotif('Registro exitoso! Revisa tu correo y verifica tu email. Luego el admin aprobara tu cuenta.','exito');
-      setTimeout(() => onBack(), 6000);
+      // Dejamos la sesion cerrada para que el flujo sea simple: verificar correo y luego iniciar sesion.
+      try { await signOut(auth); } catch (e) {}
+
+      mostrarNotif('Email enviado. Verifica tu correo y luego inicia sesion.','exito');
+      setTimeout(() => onBack(), 4000);
     } catch (err) {
       mostrarNotif(err.message,'error');
     }

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth } from './firebase';
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from 'firebase/auth';
 import './Login.css';
 
 function Login({ onRegister }) {
@@ -23,6 +23,16 @@ function Login({ onRegister }) {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
+
+      // Si el correo no esta verificado, no dejamos entrar.
+      try { await auth.currentUser?.reload(); } catch (e) {}
+      if (auth.currentUser && auth.currentUser.emailVerified === false) {
+        mostrarNotif('Verifica tu correo antes de ingresar. Luego vuelve a iniciar sesion.', 'error');
+        try { await signOut(auth); } catch (e) {}
+        setLoading(false);
+        return;
+      }
+
       mostrarNotif('Bienvenido a FJU Cuenca!', 'exito');
     } catch (err) {
       if (
