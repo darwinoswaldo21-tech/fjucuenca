@@ -418,7 +418,7 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
 
           {onAdmin && (
             <button onClick={onAdmin} className="fju-chip fju-chipAdmin" type="button">
-              {usuario?.rol === 'admin' ? 'Admin' : 'Moderacion'}
+              Admin
             </button>
           )}
           <span className="fju-hello">Hola, {usuario.nombre}</span>

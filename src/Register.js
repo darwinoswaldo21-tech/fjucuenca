@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { auth, db } from './firebase';
-import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 
 const S = {
@@ -40,20 +40,10 @@ function Register({ onBack }) {
       await updateProfile(result.user, { displayName: nombre });
       await setDoc(doc(db, 'usuarios', result.user.uid), {
         nombre, email, rol:'miembro', aprobado:false,
-        emailVerificado: false,
         fechaRegistro: new Date().toISOString(),
       });
-
-      // Enviar verificacion de correo (el usuario debe hacer click en el link).
-      try {
-        await sendEmailVerification(result.user);
-      } catch (e) {
-        // No bloquea el registro si falla el envio.
-        console.log('No se pudo enviar verificacion:', e);
-      }
-
-      mostrarNotif('Registro exitoso! Revisa tu correo y verifica tu email. Luego el admin aprobara tu cuenta.','exito');
-      setTimeout(() => onBack(), 6000);
+      mostrarNotif('Registro exitoso! El admin revisara tu cuenta pronto.','exito');
+      setTimeout(() => onBack(), 5000);
     } catch (err) {
       mostrarNotif(err.message,'error');
     }
@@ -64,7 +54,7 @@ function Register({ onBack }) {
     <div style={{minHeight:'100vh',background:'linear-gradient(135deg,#1B2A6B,#0D1533)',display:'flex',alignItems:'center',justifyContent:'center',padding:'20px'}}>
       {notif && (
         <div style={{position:'fixed',top:'24px',left:'50%',transform:'translateX(-50%)',background:notif.tipo==='exito'?'#1B2A6B':'#e53e3e',color:'white',padding:'16px 32px',borderRadius:'12px',boxShadow:'0 8px 32px rgba(0,0,0,0.25)',fontSize:'15px',fontWeight:'500',zIndex:1000,textAlign:'center',minWidth:'300px'}}>
-          {notif.tipo==='exito'?'✓ ':'✕ '}{notif.msg}
+          {notif.tipo==='exito'?'OK: ':'ERROR: '}{notif.msg}
         </div>
       )}
       <div style={{background:'white',borderRadius:'24px',padding:'40px',width:'100%',maxWidth:'400px',boxShadow:'0 24px 80px rgba(0,0,0,0.4)'}}>
@@ -80,8 +70,8 @@ function Register({ onBack }) {
         <label style={S.label}>CONTRASENA</label>
         <div style={{position:'relative',marginBottom:'8px'}}>
           <input type={verPass?'text':'password'} placeholder="Minimo 6 caracteres" value={password} onChange={(e)=>setPassword(e.target.value)} style={{...S.input,paddingRight:'48px'}} />
-          <button onClick={()=>setVerPass(!verPass)} style={{position:'absolute',right:'12px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'18px'}}>
-            {verPass?'🙈':'👁️'}
+          <button onClick={()=>setVerPass(!verPass)} style={{position:'absolute',right:'12px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'12px',fontWeight:'700',color:'#1B2A6B'}}>
+            {verPass ? 'Ocultar' : 'Ver'}
           </button>
         </div>
         {password.length>0 && (

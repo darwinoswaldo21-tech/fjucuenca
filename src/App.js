@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
-import { onAuthStateChanged, sendEmailVerification, signOut } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, limit, query, setDoc, updateDoc, where } from 'firebase/firestore';
 import Login from './Login';
 import Register from './Register';
@@ -22,33 +22,18 @@ function App() {
   const [cargando, setCargando] = useState(true);
   const [helpCategory, setHelpCategory] = useState(null);
   const [activeGroupId, setActiveGroupId] = useState(null);
-  const [emailPendiente, setEmailPendiente] = useState(null);
-  const [revisandoPendiente, setRevisandoPendiente] = useState(false);
-  const [perfilError, setPerfilError] = useState(null);
-
-  const ADMIN_WA_PHONE = process.env.REACT_APP_ADMIN_WA_PHONE || '';
-  const ADMIN_WA_NAME = process.env.REACT_APP_ADMIN_WA_NAME || 'admin';
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       try {
         if (user) {
-          setPerfilError(null);
-          // Asegura que emailVerified este actualizado.
-          try {
-            await user.reload();
-          } catch (e) {
-            // No bloquea si falla.
-          }
-
           const userRef = doc(db, 'usuarios', user.uid);
           let snap = await getDoc(userRef);
           let data = null;
 
           if (!snap.exists()) {
-            // Caso comun: el doc existe pero con ID incorrecto (por ejemplo el nombre). Intentamos migrar por email.
+            // Caso comun: existe un doc legacy (por ejemplo por nombre). Intentamos migrar por email.
             const email = user.email || null;
-            const displayName = user.displayName || null;
 
             const tryLegacyMatch = async (field, value) => {
               if (!value) return null;
@@ -61,12 +46,6 @@ function App() {
             // 1) Por email (si existe en Firestore)
             let legacyDoc = await tryLegacyMatch('email', email);
 
-            // 2) Fallback por nombre (muchos docs viejos no tienen email)
-            if (!legacyDoc) legacyDoc = await tryLegacyMatch('nombre', displayName);
-
-            // 3) Fallback final: nombre basado en el correo
-            if (!legacyDoc && email) legacyDoc = await tryLegacyMatch('nombre', email.split('@')[0]);
-
             if (legacyDoc) {
               data = legacyDoc.data();
 
@@ -78,23 +57,6 @@ function App() {
 
           if (snap.exists()) {
             data = snap.data();
-
-            // Sincroniza emailVerificado para que el admin lo vea (best-effort).
-            const emailVerificadoActual = !!user.emailVerified;
-            if (data.emailVerificado !== emailVerificadoActual) {
-              try {
-                await updateDoc(doc(db, 'usuarios', user.uid), { emailVerificado: emailVerificadoActual });
-                data = { ...data, emailVerificado: emailVerificadoActual };
-              } catch (e) {}
-            }
-
-            // 1) Exigir verificacion de correo antes de cualquier acceso.
-            if (!user.emailVerified) {
-              setUsuario(null);
-              setEmailPendiente(user.email || null);
-              setPantalla('verificarEmail');
-              return;
-            }
 
             // Verificar aprobado
             if (data.aprobado === false) {
@@ -133,40 +95,20 @@ function App() {
               email: user.email || '',
               rol: 'miembro',
               aprobado: false,
-              emailVerificado: !!user.emailVerified,
               fechaRegistro: new Date().toISOString(),
             }, { merge: true });
 
-            if (!user.emailVerified) {
-              setUsuario(null);
-              setEmailPendiente(user.email || null);
-              setPantalla('verificarEmail');
-            } else {
-              setUsuario(null);
-              setPantalla('pendiente');
-            }
+            setUsuario(null);
+            setPantalla('pendiente');
           }
       } else {
         setUsuario(null);
-        setEmailPendiente(null);
-        setPerfilError(null);
         setPantalla('login');
       }
       } catch (e) {
         console.log('Error cargando usuario:', e);
-
-        // Si el login fue OK pero fallo cargar Firestore, no lo mandamos a Login silenciosamente.
-        if (auth.currentUser) {
-          setUsuario(null);
-          setEmailPendiente(null);
-          setPerfilError(e?.message || String(e));
-          setPantalla('errorPerfil');
-        } else {
-          setUsuario(null);
-          setEmailPendiente(null);
-          setPerfilError(null);
-          setPantalla('login');
-        }
+        setUsuario(null);
+        setPantalla('login');
       } finally {
         setCargando(false);
       }
@@ -180,8 +122,6 @@ function App() {
       setPresenceOffline(auth.currentUser.uid).catch(() => {});
     }
     await signOut(auth);
-    setEmailPendiente(null);
-    setPerfilError(null);
     setPantalla('login');
   };
 
@@ -191,154 +131,6 @@ function App() {
     </div>
   );
 
-  const handleReenviarVerificacion = async () => {
-    if (!auth.currentUser) return;
-    try {
-      await sendEmailVerification(auth.currentUser);
-      alert('Listo! Te enviamos un correo de verificacion. Revisa spam.');
-    } catch (e) {
-      alert('No se pudo enviar el correo: ' + (e?.message || 'Error'));
-    }
-  };
-
-  const buildAdminWhatsAppLink = (motivo) => {
-    if (!ADMIN_WA_PHONE) return null;
-
-    const u = auth.currentUser;
-    const nombre = (u?.displayName || '').trim() || 'Usuario';
-    const email = u?.email || '(sin email)';
-    const uid = u?.uid || '(sin uid)';
-
-    const msg =
-      `Hola ${ADMIN_WA_NAME}, soy ${nombre}. ` +
-      `Mi correo es ${email}. ` +
-      `Motivo: ${motivo}. ` +
-      `UID: ${uid}.`;
-
-    return `https://wa.me/${ADMIN_WA_PHONE}?text=${encodeURIComponent(msg)}`;
-  };
-
-  const handleAvisarAdmin = (motivo) => {
-    const link = buildAdminWhatsAppLink(motivo);
-    if (!link) {
-      alert('Falta configurar el WhatsApp del admin (REACT_APP_ADMIN_WA_PHONE).');
-      return;
-    }
-    window.open(link, '_blank', 'noopener,noreferrer');
-  };
-
-  const handleYaVerifique = async () => {
-    if (!auth.currentUser) return;
-    try {
-      await auth.currentUser.reload();
-      if (!auth.currentUser.emailVerified) {
-        alert('Aun no aparece como verificado. Abre el link del correo y vuelve a intentar.');
-        return;
-      }
-
-      setEmailPendiente(null);
-
-      const user = auth.currentUser;
-      const userRef = doc(db, 'usuarios', user.uid);
-      const snap = await getDoc(userRef);
-
-      if (snap.exists()) {
-        const data = snap.data();
-        try { await updateDoc(doc(db, 'usuarios', user.uid), { emailVerificado: true }); } catch (e) {}
-
-        if (data.aprobado === false) {
-          setUsuario(null);
-          setPantalla('pendiente');
-          return;
-        }
-
-        const nombreFinal = data.nombre && data.nombre.trim() !== ''
-          ? data.nombre
-          : user.displayName || user.email?.split('@')[0] || 'Usuario';
-
-        setUsuario({ ...data, uid: user.uid, nombre: nombreFinal, emailVerificado: true });
-        setPantalla(data.rol === 'admin' ? 'admin' : 'feed');
-        return;
-      }
-
-      setUsuario(null);
-      setPantalla('pendiente');
-    } catch (e) {
-      alert('No se pudo verificar el estado: ' + (e?.message || 'Error'));
-    }
-  };
-
-  const handleRevisarAprobacion = async () => {
-    if (!auth.currentUser) return;
-    if (revisandoPendiente) return;
-
-    setRevisandoPendiente(true);
-    try {
-      await auth.currentUser.reload();
-
-      if (!auth.currentUser.emailVerified) {
-        setUsuario(null);
-        setEmailPendiente(auth.currentUser.email || null);
-        setPantalla('verificarEmail');
-        return;
-      }
-
-      const user = auth.currentUser;
-      const userRef = doc(db, 'usuarios', user.uid);
-      const snap = await getDoc(userRef);
-
-      if (!snap.exists()) {
-        // Si el usuario existe en Auth pero no en Firestore (registro incompleto),
-        // creamos el perfil para que el admin pueda aprobarlo.
-        const nombreFinal =
-          user.displayName ||
-          user.email?.split('@')[0] ||
-          'Usuario';
-
-        try {
-          await setDoc(userRef, {
-            nombre: nombreFinal,
-            email: user.email || '',
-            rol: 'miembro',
-            aprobado: false,
-            emailVerificado: true,
-            fechaRegistro: new Date().toISOString(),
-          }, { merge: true });
-        } catch (e) {
-          alert('No se pudo crear tu perfil en la base: ' + (e?.message || 'Error'));
-          return;
-        }
-
-        alert('Listo. Se creo tu perfil y quedaste pendiente de aprobacion.');
-        setUsuario(null);
-        setPantalla('pendiente');
-        return;
-      }
-
-      const data = snap.data();
-
-      // Best-effort: marcar email verificado en Firestore.
-      try { await updateDoc(doc(db, 'usuarios', user.uid), { emailVerificado: true }); } catch (e) {}
-
-      if (data.aprobado === false) {
-        alert('Aun estas pendiente de aprobacion. Si ya avisaste al admin, espera un momento y vuelve a intentar.');
-        return;
-      }
-
-      const nombreFinal = data.nombre && data.nombre.trim() !== ''
-        ? data.nombre
-        : user.displayName || user.email?.split('@')[0] || 'Usuario';
-
-      setEmailPendiente(null);
-      setUsuario({ ...data, uid: user.uid, nombre: nombreFinal, emailVerificado: true });
-      setPantalla(data.rol === 'admin' ? 'admin' : 'feed');
-    } catch (e) {
-      alert('No se pudo revisar el estado: ' + (e?.message || 'Error'));
-    } finally {
-      setRevisandoPendiente(false);
-    }
-  };
-
   return (
     <div>
       {pantalla === 'login' && (
@@ -347,72 +139,12 @@ function App() {
       {pantalla === 'register' && (
         <Register onBack={() => setPantalla('login')} />
       )}
-      {pantalla === 'errorPerfil' && (
-        <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh',background:'linear-gradient(135deg,#1B2A6B,#0D1533)',flexDirection:'column',gap:'16px',padding:'20px'}}>
-          <div style={{background:'white',borderRadius:'24px',padding:'40px',maxWidth:'520px',textAlign:'center',boxShadow:'0 24px 80px rgba(0,0,0,0.4)'}}>
-            <h2 style={{color:'#1B2A6B',margin:'0 0 10px'}}>Error cargando tu perfil</h2>
-            <p style={{color:'#666',fontSize:'14px',margin:'0 0 18px',lineHeight:'1.6'}}>
-              La sesion se inicio, pero hubo un problema leyendo tu informacion en Firestore.
-            </p>
-            {perfilError && (
-              <div style={{background:'#fff3cd',border:'1px solid #ffeeba',borderRadius:'12px',padding:'12px',textAlign:'left',fontSize:'12px',color:'#856404',marginBottom:'16px',whiteSpace:'pre-wrap'}}>
-                {perfilError}
-              </div>
-            )}
-            <div style={{display:'flex',gap:'10px',justifyContent:'center',flexWrap:'wrap'}}>
-              <button onClick={handleRevisarAprobacion} style={{padding:'12px 18px',background:'#1B2A6B',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'800'}}>
-                Reintentar
-              </button>
-              <button onClick={() => handleAvisarAdmin('No puedo entrar: error cargando perfil')} style={{padding:'12px 18px',background:'#25D366',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'800'}}>
-                Avisar al admin (WhatsApp)
-              </button>
-              <button onClick={handleLogout} style={{padding:'12px 18px',background:'transparent',color:'#666',border:'2px solid #ddd',borderRadius:'12px',cursor:'pointer',fontWeight:'800'}}>
-                Salir
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {pantalla === 'verificarEmail' && (
-        <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh',background:'linear-gradient(135deg,#1B2A6B,#0D1533)',flexDirection:'column',gap:'16px',padding:'20px'}}>
-          <div style={{background:'white',borderRadius:'24px',padding:'40px',maxWidth:'460px',textAlign:'center',boxShadow:'0 24px 80px rgba(0,0,0,0.4)'}}>
-            <h2 style={{color:'#1B2A6B',margin:'0 0 10px'}}>Verifica tu correo</h2>
-            <p style={{color:'#666',fontSize:'14px',margin:'0 0 18px',lineHeight:'1.6'}}>
-              Para entrar a FJU Cuenca necesitas confirmar tu email.
-              {emailPendiente ? (<><br /><strong>{emailPendiente}</strong></>) : null}
-            </p>
-            <div style={{display:'flex',gap:'10px',justifyContent:'center',flexWrap:'wrap'}}>
-              <button onClick={handleReenviarVerificacion} style={{padding:'12px 18px',background:'#1B2A6B',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'700'}}>
-                Reenviar correo
-              </button>
-              <button onClick={handleYaVerifique} style={{padding:'12px 18px',background:'white',color:'#1B2A6B',border:'2px solid #1B2A6B',borderRadius:'12px',cursor:'pointer',fontWeight:'700'}}>
-                Ya verifique
-              </button>
-              <button onClick={() => handleAvisarAdmin('No me llega el correo / necesito ayuda para verificar')} style={{padding:'12px 18px',background:'#25D366',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'800'}}>
-                Avisar al admin (WhatsApp)
-              </button>
-              <button onClick={handleLogout} style={{padding:'12px 18px',background:'transparent',color:'#666',border:'2px solid #ddd',borderRadius:'12px',cursor:'pointer',fontWeight:'700'}}>
-                Salir
-              </button>
-            </div>
-            <p style={{color:'#aaa',fontSize:'12px',margin:'16px 0 0'}}>
-              Si no llega, revisa spam y vuelve a reenviar.
-            </p>
-          </div>
-        </div>
-      )}
       {pantalla === 'pendiente' && (
         <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh',background:'linear-gradient(135deg,#1B2A6B,#0D1533)',flexDirection:'column',gap:'16px'}}>
           <div style={{background:'white',borderRadius:'24px',padding:'40px',maxWidth:'400px',textAlign:'center',boxShadow:'0 24px 80px rgba(0,0,0,0.4)'}}>
             <p style={{fontSize:'44px',margin:'0 0 12px',letterSpacing:'2px',fontWeight:'800',color:'#B8860B'}}>PENDIENTE</p>
             <h2 style={{color:'#1B2A6B',margin:'0 0 8px'}}>Cuenta pendiente</h2>
             <p style={{color:'#666',fontSize:'14px',margin:'0 0 20px'}}>Tu cuenta esta siendo revisada por el administrador. Te avisaran pronto.</p>
-            <button onClick={handleRevisarAprobacion} disabled={revisandoPendiente} style={{width:'100%',padding:'12px 16px',background:revisandoPendiente?'#888':'#1B2A6B',color:'white',border:'none',borderRadius:'12px',cursor:revisandoPendiente?'not-allowed':'pointer',fontWeight:'800',marginBottom:'10px'}}>
-              {revisandoPendiente ? 'Revisando...' : 'Ya me aprobaron (revisar)'}
-            </button>
-            <button onClick={() => handleAvisarAdmin('Ya verifique mi correo y necesito aprobacion')} style={{width:'100%',padding:'12px 16px',background:'#25D366',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'800',marginBottom:'10px'}}>
-              Avisar al admin (WhatsApp)
-            </button>
             <button onClick={handleLogout} style={{padding:'12px 24px',background:'#1B2A6B',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'600'}}>
               Volver al inicio
             </button>
@@ -423,7 +155,7 @@ function App() {
         <Feed
           usuario={usuario}
           onLogout={handleLogout}
-          onAdmin={(usuario.rol === 'admin' || usuario.rol === 'moderador') ? () => setPantalla('admin') : null}
+          onAdmin={usuario.rol === 'admin' ? () => setPantalla('admin') : null}
           onChat={() => setPantalla('chat')}
           onChatPrivado={() => setPantalla('mensajes')}
           onHelp={() => setPantalla('help')}
