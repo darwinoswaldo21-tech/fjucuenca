@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from './firebase';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { onAuthStateChanged, sendEmailVerification, signOut } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, limit, query, setDoc, updateDoc, where } from 'firebase/firestore';
 import Login from './Login';
 import Register from './Register';
@@ -23,11 +23,15 @@ function App() {
   const [helpCategory, setHelpCategory] = useState(null);
   const [activeGroupId, setActiveGroupId] = useState(null);
   const [revisandoAprobacion, setRevisandoAprobacion] = useState(false);
+  const [emailPendiente, setEmailPendiente] = useState(null);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       try {
         if (user) {
+          // Refrescar emailVerified (best-effort).
+          try { await user.reload(); } catch (e) {}
+
           const userRef = doc(db, 'usuarios', user.uid);
           let snap = await getDoc(userRef);
           let data = null;
@@ -58,6 +62,19 @@ function App() {
 
           if (snap.exists()) {
             data = snap.data();
+
+            // 1) Exigir verificacion de email antes de permitir cualquier acceso.
+            if (!user.emailVerified) {
+              setUsuario(null);
+              setEmailPendiente(user.email || null);
+              setPantalla('verificarEmail');
+              return;
+            }
+
+            // Marcar en Firestore que ya esta verificado (solo informativo).
+            if (data.emailVerificado !== true) {
+              try { await updateDoc(doc(db, 'usuarios', user.uid), { emailVerificado: true }); } catch (e) {}
+            }
 
             // Verificar aprobado (solo entra si aprobado === true)
             if (data.aprobado !== true) {
@@ -96,19 +113,28 @@ function App() {
               email: user.email || '',
               rol: 'miembro',
               aprobado: false,
+              emailVerificado: !!user.emailVerified,
               fechaRegistro: new Date().toISOString(),
             }, { merge: true });
 
-            setUsuario(null);
-            setPantalla('pendiente');
+            if (!user.emailVerified) {
+              setUsuario(null);
+              setEmailPendiente(user.email || null);
+              setPantalla('verificarEmail');
+            } else {
+              setUsuario(null);
+              setPantalla('pendiente');
+            }
           }
       } else {
         setUsuario(null);
+        setEmailPendiente(null);
         setPantalla('login');
       }
       } catch (e) {
         console.log('Error cargando usuario:', e);
         setUsuario(null);
+        setEmailPendiente(null);
         setPantalla('login');
       } finally {
         setCargando(false);
@@ -123,7 +149,34 @@ function App() {
       setPresenceOffline(auth.currentUser.uid).catch(() => {});
     }
     await signOut(auth);
+    setEmailPendiente(null);
     setPantalla('login');
+  };
+
+  const handleReenviarVerificacion = async () => {
+    if (!auth.currentUser) return;
+    try {
+      await sendEmailVerification(auth.currentUser);
+      alert('Listo! Te enviamos un correo de verificacion. Revisa spam.');
+    } catch (e) {
+      alert('No se pudo enviar el correo: ' + (e?.message || 'Error'));
+    }
+  };
+
+  const handleYaVerifique = async () => {
+    if (!auth.currentUser) return;
+    try {
+      await auth.currentUser.reload();
+      if (!auth.currentUser.emailVerified) {
+        alert('Aun no aparece como verificado. Abre el link del correo y vuelve a intentar.');
+        return;
+      }
+      setEmailPendiente(null);
+      // Re-evaluar aprobado
+      await handleRevisarAprobacion();
+    } catch (e) {
+      alert('No se pudo verificar el estado: ' + (e?.message || 'Error'));
+    }
   };
 
   const handleRevisarAprobacion = async () => {
@@ -133,6 +186,16 @@ function App() {
     setRevisandoAprobacion(true);
     try {
       const user = auth.currentUser;
+
+      // Si aun no verifico email, mandarlo a esa pantalla.
+      try { await user.reload(); } catch (e) {}
+      if (!user.emailVerified) {
+        setUsuario(null);
+        setEmailPendiente(user.email || null);
+        setPantalla('verificarEmail');
+        return;
+      }
+
       const userRef = doc(db, 'usuarios', user.uid);
       const snap = await getDoc(userRef);
 
@@ -179,6 +242,29 @@ function App() {
       )}
       {pantalla === 'register' && (
         <Register onBack={() => setPantalla('login')} />
+      )}
+      {pantalla === 'verificarEmail' && (
+        <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh',background:'linear-gradient(135deg,#1B2A6B,#0D1533)',flexDirection:'column',gap:'16px',padding:'20px'}}>
+          <div style={{background:'white',borderRadius:'24px',padding:'40px',maxWidth:'460px',textAlign:'center',boxShadow:'0 24px 80px rgba(0,0,0,0.4)'}}>
+            <p style={{fontSize:'44px',margin:'0 0 12px',letterSpacing:'2px',fontWeight:'800',color:'#B8860B'}}>EMAIL</p>
+            <h2 style={{color:'#1B2A6B',margin:'0 0 8px'}}>Verifica tu correo</h2>
+            <p style={{color:'#666',fontSize:'14px',margin:'0 0 20px',lineHeight:'1.6'}}>
+              Te enviamos un correo de verificacion.
+              {emailPendiente ? (<><br /><strong>{emailPendiente}</strong></>) : null}
+            </p>
+            <div style={{display:'flex',gap:'10px',justifyContent:'center',flexWrap:'wrap'}}>
+              <button onClick={handleReenviarVerificacion} style={{padding:'12px 18px',background:'#1B2A6B',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'800'}}>
+                Reenviar correo
+              </button>
+              <button onClick={handleYaVerifique} style={{padding:'12px 18px',background:'white',color:'#1B2A6B',border:'2px solid #1B2A6B',borderRadius:'12px',cursor:'pointer',fontWeight:'800'}}>
+                Ya verifique
+              </button>
+              <button onClick={handleLogout} style={{padding:'12px 18px',background:'transparent',color:'#666',border:'2px solid #ddd',borderRadius:'12px',cursor:'pointer',fontWeight:'800'}}>
+                Salir
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       {pantalla === 'pendiente' && (
         <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh',background:'linear-gradient(135deg,#1B2A6B,#0D1533)',flexDirection:'column',gap:'16px'}}>
