@@ -288,7 +288,30 @@ function App() {
       const snap = await getDoc(userRef);
 
       if (!snap.exists()) {
-        alert('Tu perfil aun no existe en la base. Intenta salir y entrar de nuevo.');
+        // Si el usuario existe en Auth pero no en Firestore (registro incompleto),
+        // creamos el perfil para que el admin pueda aprobarlo.
+        const nombreFinal =
+          user.displayName ||
+          user.email?.split('@')[0] ||
+          'Usuario';
+
+        try {
+          await setDoc(userRef, {
+            nombre: nombreFinal,
+            email: user.email || '',
+            rol: 'miembro',
+            aprobado: false,
+            emailVerificado: true,
+            fechaRegistro: new Date().toISOString(),
+          }, { merge: true });
+        } catch (e) {
+          alert('No se pudo crear tu perfil en la base: ' + (e?.message || 'Error'));
+          return;
+        }
+
+        alert('Listo. Se creo tu perfil y quedaste pendiente de aprobacion.');
+        setUsuario(null);
+        setPantalla('pendiente');
         return;
       }
 
