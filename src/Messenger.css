@@ -1,9 +1,9 @@
 .fju-messenger {
   min-height: 100vh;
   background:
-    radial-gradient(1200px 800px at 20% 10%, rgba(245, 166, 35, 0.18), transparent 55%),
-    radial-gradient(900px 700px at 80% 0%, rgba(61, 90, 153, 0.32), transparent 60%),
-    linear-gradient(180deg, #0b1020, #0f1b3a);
+    radial-gradient(1200px 800px at 20% 10%, rgba(244, 114, 182, 0.16), transparent 55%),
+    radial-gradient(900px 700px at 80% 0%, rgba(224, 67, 134, 0.26), transparent 60%),
+    linear-gradient(180deg, #120812, #1b0a1a);
   font-family: "Space Grotesk", "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
 
@@ -13,7 +13,7 @@
   z-index: 40;
   padding: 10px 14px;
   backdrop-filter: blur(14px);
-  background: rgba(15, 27, 58, 0.55);
+  background: rgba(27, 10, 26, 0.55);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -92,8 +92,8 @@
   transition: background 120ms ease;
 }
 
-.fju-msUser:hover { background: rgba(27, 42, 107, 0.06); }
-.fju-msUserActive { background: rgba(245, 166, 35, 0.10); }
+.fju-msUser:hover { background: rgba(157, 23, 77, 0.08); }
+.fju-msUserActive { background: rgba(244, 114, 182, 0.12); }
 
 .fju-msAvatar {
   width: 36px;
@@ -102,7 +102,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1b2a6b, #3d5a99);
+  background: linear-gradient(135deg, #b1125a, #e04386);
   color: white;
   font-weight: 700;
 }
@@ -111,7 +111,7 @@
 .fju-msName {
   margin: 0;
   font-weight: 700;
-  color: #1b2a6b;
+  color: #9d174d;
   font-size: 13.5px;
   white-space: nowrap;
   overflow: hidden;
@@ -133,8 +133,8 @@
 }
 
 .fju-msDotOn {
-  background: #1d4ed8;
-  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.18);
+  background: #db2777;
+  box-shadow: 0 0 0 3px rgba(219, 39, 119, 0.18);
 }
 
 .fju-msChat {
@@ -157,7 +157,7 @@
   margin: 0;
   font-size: 14.5px;
   font-weight: 700;
-  color: #1b2a6b;
+  color: #9d174d;
 }
 
 .fju-msChatBody {
@@ -188,7 +188,7 @@
 }
 
 .fju-msBubbleMe {
-  background: linear-gradient(135deg, #1b2a6b, #3d5a99);
+  background: linear-gradient(135deg, #b1125a, #e04386);
   color: white;
   border-bottom-right-radius: 6px;
 }
@@ -229,8 +229,8 @@
   cursor: pointer;
   font-weight: 700;
   color: white;
-  background: linear-gradient(135deg, #1b2a6b, #3d5a99);
-  box-shadow: 0 18px 40px rgba(27, 42, 107, 0.20);
+  background: linear-gradient(135deg, #b1125a, #e04386);
+  box-shadow: 0 18px 40px rgba(177, 18, 90, 0.20);
 }
 
 .fju-msEmpty {
@@ -244,4 +244,3 @@
   .fju-msShell { grid-template-columns: 1fr; }
   .fju-msList { max-height: 320px; }
 }
-

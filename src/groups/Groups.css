@@ -3,9 +3,9 @@
 .fju-groups {
   min-height: 100vh;
   background:
-    radial-gradient(1200px 800px at 20% 10%, rgba(245, 166, 35, 0.18), transparent 55%),
-    radial-gradient(900px 700px at 80% 0%, rgba(61, 90, 153, 0.32), transparent 60%),
-    linear-gradient(180deg, #0b1020, #0f1b3a);
+    radial-gradient(1200px 800px at 20% 10%, rgba(244, 114, 182, 0.16), transparent 55%),
+    radial-gradient(900px 700px at 80% 0%, rgba(224, 67, 134, 0.26), transparent 60%),
+    linear-gradient(180deg, #120812, #1b0a1a);
   font-family: "Space Grotesk", "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
 
@@ -15,7 +15,7 @@
   z-index: 40;
   padding: 10px 14px;
   backdrop-filter: blur(14px);
-  background: rgba(15, 27, 58, 0.55);
+  background: rgba(27, 10, 26, 0.55);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -37,8 +37,8 @@
 .fju-gBtn {
   /* Default button style is used inside light cards, so keep strong contrast. */
   border: 1px solid rgba(12, 18, 34, 0.14);
-  background: rgba(27, 42, 107, 0.06);
-  color: rgba(27, 42, 107, 0.92);
+  background: rgba(157, 23, 77, 0.06);
+  color: rgba(157, 23, 77, 0.92);
   padding: 7px 10px;
   border-radius: 999px;
   cursor: pointer;
@@ -47,7 +47,7 @@
 }
 
 .fju-gBtn:hover {
-  background: rgba(27, 42, 107, 0.10);
+  background: rgba(157, 23, 77, 0.10);
 }
 
 /* Top bar is dark, so invert button colors there for readability. */
@@ -112,7 +112,7 @@
 
 .fju-gItemTitle {
   margin: 0;
-  color: #1b2a6b;
+  color: #9d174d;
   font-weight: 800;
   font-size: 14.5px;
 }
@@ -151,8 +151,8 @@
   cursor: pointer;
   font-weight: 800;
   color: white;
-  background: linear-gradient(135deg, #1b2a6b, #3d5a99);
-  box-shadow: 0 18px 40px rgba(27, 42, 107, 0.20);
+  background: linear-gradient(135deg, #b1125a, #e04386);
+  box-shadow: 0 18px 40px rgba(177, 18, 90, 0.20);
 }
 
 .fju-gDanger {
@@ -190,7 +190,7 @@
 
 .fju-epTitle {
   margin: 0;
-  color: #1b2a6b;
+  color: #9d174d;
   font-weight: 800;
   font-size: 14px;
 }
