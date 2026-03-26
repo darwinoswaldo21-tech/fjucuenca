@@ -33,7 +33,7 @@ export default function ResourcesScreen() {
             style={{
               display: "block",
               marginBottom: "10px",
-              color: "#0f9d58",
+              color: "#b1125a",
               textDecoration: "none",
               fontWeight: "bold",
             }}

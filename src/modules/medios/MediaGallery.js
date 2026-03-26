@@ -244,7 +244,7 @@ function MediaGallery({ usuario }) {
           <div
             key={f.id}
             onClick={() => setIndiceActual(i)}
-            style={{ ...estilos.miniatura, border: i === idx ? '3px solid #1B2A6B' : '2px solid transparent' }}
+            style={{ ...estilos.miniatura, border: i === idx ? '3px solid #9d174d' : '2px solid transparent' }}
           >
             {getThumbnail(f) ? (
               <img src={getThumbnail(f)} alt={f.evento} style={estilos.miniaturaImg} onError={(e) => { e.target.style.display = 'none'; }} />
@@ -267,11 +267,11 @@ const estilos = {
   vacio: { textAlign: 'center', color: '#aaa', padding: 40, fontSize: 15 },
   card: { background: 'white', borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.1)', marginBottom: 16 },
   cardHeader: { display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px' },
-  avatar: { width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg,#1B2A6B,#3d5a99)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: 15, flexShrink: 0 },
+  avatar: { width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg,#b1125a,#e04386)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: 15, flexShrink: 0 },
   cardMeta: { flex: 1 },
-  cardNombre: { fontSize: 14, fontWeight: 700, color: '#1B2A6B' },
+  cardNombre: { fontSize: 14, fontWeight: 700, color: '#9d174d' },
   cardFecha: { fontSize: 11, color: '#aaa' },
-  eventoBadge: { background: '#EEF1FF', color: '#1B2A6B', fontSize: 11, padding: '4px 12px', borderRadius: 20, fontWeight: 600 },
+  eventoBadge: { background: '#f7e8f0', color: '#9d174d', fontSize: 11, padding: '4px 12px', borderRadius: 20, fontWeight: 600 },
   borrarBtn: { background: '#fee2e2', border: 'none', borderRadius: 8, padding: '4px 12px', color: '#dc2626', fontSize: 12, cursor: 'pointer', fontWeight: 600 },
   cardBody: { display: 'flex' },
   mediaLado: { width: '55%', position: 'relative' },
@@ -279,20 +279,20 @@ const estilos = {
   video: { width: '100%', height: 280, display: 'block', border: 'none' },
   reaccionesOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.5))', padding: '24px 10px 8px', display: 'flex', gap: 6 },
   reaccionBtn: { background: 'rgba(255,255,255,0.25)', border: 'none', borderRadius: 20, padding: '4px 10px', color: 'white', fontSize: 13, cursor: 'pointer', fontWeight: 600 },
-  reaccionesVideo: { display: 'flex', gap: 6, padding: '8px 10px', background: '#f8f9ff' },
-  reaccionBtnVideo: { background: '#EEF1FF', border: 'none', borderRadius: 20, padding: '4px 10px', color: '#1B2A6B', fontSize: 13, cursor: 'pointer', fontWeight: 600 },
+  reaccionesVideo: { display: 'flex', gap: 6, padding: '8px 10px', background: '#faf3f6' },
+  reaccionBtnVideo: { background: '#f7e8f0', border: 'none', borderRadius: 20, padding: '4px 10px', color: '#9d174d', fontSize: 13, cursor: 'pointer', fontWeight: 600 },
   descargarBtn: { position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: 8, padding: '5px 10px', color: 'white', fontSize: 12, cursor: 'pointer' },
   comentariosLado: { flex: 1, borderLeft: '1px solid #f0f0f0', overflow: 'hidden' },
   cardFooter: { display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderTop: '1px solid #f5f5f5', flexWrap: 'wrap' },
   stat: { fontSize: 12, color: '#888', marginRight: 4 },
   footerBtn: { background: 'none', border: '1px solid #ddd', borderRadius: 8, padding: '5px 12px', fontSize: 12, cursor: 'pointer', color: '#555' },
-  feedBtn: { background: '#1B2A6B', border: 'none', borderRadius: 8, padding: '5px 12px', fontSize: 12, cursor: 'pointer', color: 'white', fontWeight: 600 },
+  feedBtn: { background: '#9d174d', border: 'none', borderRadius: 8, padding: '5px 12px', fontSize: 12, cursor: 'pointer', color: 'white', fontWeight: 600 },
   navBtns: { display: 'flex', gap: 6, marginLeft: 'auto' },
-  navBtn: { background: '#f0f2f5', border: 'none', borderRadius: 8, padding: '5px 12px', fontSize: 12, cursor: 'pointer', color: '#555' },
+  navBtn: { background: '#f7eef2', border: 'none', borderRadius: 8, padding: '5px 12px', fontSize: 12, cursor: 'pointer', color: '#555' },
   miniaturas: { display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 8 },
-  miniatura: { flexShrink: 0, width: 64, height: 64, borderRadius: 8, overflow: 'hidden', cursor: 'pointer', position: 'relative', background: '#f0f2f5' },
+  miniatura: { flexShrink: 0, width: 64, height: 64, borderRadius: 8, overflow: 'hidden', cursor: 'pointer', position: 'relative', background: '#f7eef2' },
   miniaturaImg: { width: '100%', height: '100%', objectFit: 'cover' },
-  miniaturaPlaceholder: { width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, background: '#EEF1FF' },
+  miniaturaPlaceholder: { width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, background: '#f7e8f0' },
   videoIcono: { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'rgba(0,0,0,0.6)', color: 'white', borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 },
   lightboxOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.92)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 },
   lightboxContenedor: { position: 'relative', maxWidth: '95vw', maxHeight: '95vh' },

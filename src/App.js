@@ -138,7 +138,7 @@ function App() {
   };
 
   if (cargando) return (
-    <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh',background:'#1B2A6B',color:'white',fontSize:'18px'}}>
+    <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh',background:'#9d174d',color:'white',fontSize:'18px'}}>
       Cargando FJU...
     </div>
   );
@@ -152,12 +152,12 @@ function App() {
         <Register onBack={() => setPantalla('login')} />
       )}
       {pantalla === 'pendiente' && (
-        <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh',background:'linear-gradient(135deg,#1B2A6B,#0D1533)',flexDirection:'column',gap:'16px'}}>
+        <div style={{display:'flex',justifyContent:'center',alignItems:'center',minHeight:'100vh',background:'linear-gradient(135deg,#b1125a,#6b0f35)',flexDirection:'column',gap:'16px'}}>
           <div style={{background:'white',borderRadius:'24px',padding:'40px',maxWidth:'400px',textAlign:'center',boxShadow:'0 24px 80px rgba(0,0,0,0.4)'}}>
             <p style={{fontSize:'44px',margin:'0 0 12px',letterSpacing:'2px',fontWeight:'800',color:'#B8860B'}}>PENDIENTE</p>
-            <h2 style={{color:'#1B2A6B',margin:'0 0 8px'}}>Cuenta pendiente</h2>
+            <h2 style={{color:'#9d174d',margin:'0 0 8px'}}>Cuenta pendiente</h2>
             <p style={{color:'#666',fontSize:'14px',margin:'0 0 20px'}}>Falta que el admin apruebe tu cuenta para que puedas ingresar.</p>
-            <button onClick={handleLogout} style={{padding:'12px 24px',background:'#1B2A6B',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'600'}}>
+            <button onClick={handleLogout} style={{padding:'12px 24px',background:'#9d174d',color:'white',border:'none',borderRadius:'12px',cursor:'pointer',fontWeight:'600'}}>
               Volver al inicio
             </button>
           </div>
@@ -232,3 +232,4 @@ function App() {
 }
 
 export default App;
+

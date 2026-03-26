@@ -127,7 +127,7 @@ export default function HelpChatScreen({ currentUser, category, onBack }) {
           onClick={handleSend}
           style={{
             padding: '0 18px', borderRadius: 22,
-            background: cat?.color || '#5C9E7A',
+            background: cat?.color || '#b1125a',
             color: '#fff', border: 'none',
             fontWeight: 600, cursor: 'pointer',
           }}
@@ -138,3 +138,4 @@ export default function HelpChatScreen({ currentUser, category, onBack }) {
     </div>
   );
 }
+

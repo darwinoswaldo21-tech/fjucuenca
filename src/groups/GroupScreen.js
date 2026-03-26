@@ -241,8 +241,8 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
     <button
       className="fju-gBtn"
       style={{
-        borderColor: tab === id ? 'rgba(245,166,35,0.45)' : 'rgba(255,255,255,0.14)',
-        background: tab === id ? 'rgba(245,166,35,0.14)' : 'rgba(255,255,255,0.06)',
+        borderColor: tab === id ? 'rgba(244,114,182,0.45)' : 'rgba(255,255,255,0.14)',
+        background: tab === id ? 'rgba(244,114,182,0.14)' : 'rgba(255,255,255,0.06)',
       }}
       onClick={() => setTab(id)}
       type="button"
@@ -294,8 +294,8 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
               <button
                 className="fju-gBtn"
                 style={{
-                  borderColor: tab === 'episodes' ? 'rgba(245,166,35,0.45)' : 'rgba(255,255,255,0.14)',
-                  background: tab === 'episodes' ? 'rgba(245,166,35,0.14)' : 'rgba(255,255,255,0.06)',
+                  borderColor: tab === 'episodes' ? 'rgba(244,114,182,0.45)' : 'rgba(255,255,255,0.14)',
+                  background: tab === 'episodes' ? 'rgba(244,114,182,0.14)' : 'rgba(255,255,255,0.06)',
                 }}
                 onClick={() => { setTab('episodes'); setVideoType('episode'); }}
                 type="button"
@@ -307,8 +307,8 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
               <button
                 className="fju-gBtn"
                 style={{
-                  borderColor: tab === 'extras' ? 'rgba(245,166,35,0.45)' : 'rgba(255,255,255,0.14)',
-                  background: tab === 'extras' ? 'rgba(245,166,35,0.14)' : 'rgba(255,255,255,0.06)',
+                  borderColor: tab === 'extras' ? 'rgba(244,114,182,0.45)' : 'rgba(255,255,255,0.14)',
+                  background: tab === 'extras' ? 'rgba(244,114,182,0.14)' : 'rgba(255,255,255,0.06)',
                 }}
                 onClick={() => { setTab('extras'); setVideoType('extra'); }}
                 type="button"
@@ -331,7 +331,7 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
         {isApproved && canModerate && editingGroup && (
           <div className="fju-gCard">
             <div className="fju-gCardHead">
-              <div style={{ fontWeight: 900, color: '#1b2a6b' }}>Editar grupo</div>
+              <div style={{ fontWeight: 900, color: '#9d174d' }}>Editar grupo</div>
               <div className="fju-gNote">Solo admins/mods</div>
             </div>
             <div className="fju-gCardBody" style={{ display: 'grid', gap: 10 }}>
@@ -356,7 +356,7 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
         {!isApproved && (
           <div className="fju-gCard">
             <div className="fju-gCardHead">
-              <div style={{ fontWeight: 900, color: '#1b2a6b' }}>Acceso</div>
+              <div style={{ fontWeight: 900, color: '#9d174d' }}>Acceso</div>
               <div className="fju-gNote">{member?.status === 'pending' ? 'Pendiente' : 'No eres miembro'}</div>
             </div>
             <div className="fju-gCardBody" style={{ display: 'grid', gap: 10 }}>
@@ -379,7 +379,7 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
             {canModerate && (
               <div className="fju-gCard">
                 <div className="fju-gCardHead">
-                  <div style={{ fontWeight: 900, color: '#1b2a6b' }}>Capitulos</div>
+                  <div style={{ fontWeight: 900, color: '#9d174d' }}>Capitulos</div>
                   <button className="fju-gBtn" onClick={() => { setAdding(!adding); setVideoType('episode'); }} type="button">
                     {adding ? 'Cancelar' : 'Subir capitulo'}
                   </button>
@@ -417,7 +417,7 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
 
             <div className="fju-gCard">
               <div className="fju-gCardHead">
-                <div style={{ fontWeight: 900, color: '#1b2a6b' }}>Lista</div>
+                <div style={{ fontWeight: 900, color: '#9d174d' }}>Lista</div>
                 <div className="fju-gNote">{episodesList.length} capitulos</div>
               </div>
               <div className="fju-gCardBody" style={{ display: 'grid', gap: 12 }}>
@@ -470,7 +470,7 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
             {canModerate && (
               <div className="fju-gCard">
                 <div className="fju-gCardHead">
-                  <div style={{ fontWeight: 900, color: '#1b2a6b' }}>Extras</div>
+                  <div style={{ fontWeight: 900, color: '#9d174d' }}>Extras</div>
                   <button className="fju-gBtn" onClick={() => { setAdding(!adding); setVideoType('extra'); }} type="button">
                     {adding && videoType === 'extra' ? 'Cancelar' : 'Subir extra'}
                   </button>
@@ -504,7 +504,7 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
 
             <div className="fju-gCard">
               <div className="fju-gCardHead">
-                <div style={{ fontWeight: 900, color: '#1b2a6b' }}>Lista</div>
+                <div style={{ fontWeight: 900, color: '#9d174d' }}>Lista</div>
                 <div className="fju-gNote">{extrasList.length} videos</div>
               </div>
               <div className="fju-gCardBody" style={{ display: 'grid', gap: 12 }}>
@@ -553,7 +553,7 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
         {isApproved && canModerate && tab === 'requests' && (
           <div className="fju-gCard">
             <div className="fju-gCardHead">
-              <div style={{ fontWeight: 900, color: '#1b2a6b' }}>Solicitudes</div>
+              <div style={{ fontWeight: 900, color: '#9d174d' }}>Solicitudes</div>
               <div className="fju-gNote">Aprueba quien puede ver la serie</div>
             </div>
             <div className="fju-gCardBody" style={{ display: 'grid', gap: 10 }}>
@@ -575,7 +575,7 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
                   }}
                 >
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontWeight: 800, color: '#1b2a6b', fontSize: 13.5 }}>
+                    <div style={{ fontWeight: 800, color: '#9d174d', fontSize: 13.5 }}>
                       {p.nombre || 'Usuario'} <span style={{ color: 'rgba(12,18,34,0.45)', fontWeight: 600 }}>({p.uid})</span>
                     </div>
                     <div className="fju-gNote">Estado: pendiente</div>
@@ -590,4 +590,6 @@ export default function GroupScreen({ usuario, groupId, onBack }) {
     </div>
   );
 }
+
+
 

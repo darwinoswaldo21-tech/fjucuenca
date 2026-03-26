@@ -76,7 +76,7 @@ export default function GroupListScreen({ usuario, onBack, onOpenGroup }) {
       <div className="fju-gShell">
         <div className="fju-gCard">
           <div className="fju-gCardHead">
-            <div style={{ fontWeight: 800, color: '#1b2a6b' }}>Explorar</div>
+            <div style={{ fontWeight: 800, color: '#9d174d' }}>Explorar</div>
             <input
               className="fju-gInput"
               style={{ maxWidth: 260 }}
@@ -103,7 +103,7 @@ export default function GroupListScreen({ usuario, onBack, onOpenGroup }) {
         {creating && canCreate && (
           <div className="fju-gCard">
             <div className="fju-gCardHead">
-              <div style={{ fontWeight: 800, color: '#1b2a6b' }}>Nuevo grupo</div>
+              <div style={{ fontWeight: 800, color: '#9d174d' }}>Nuevo grupo</div>
               <div className="fju-gNote">Privado con solicitud</div>
             </div>
             <div className="fju-gCardBody" style={{ display: 'grid', gap: 10 }}>
@@ -122,4 +122,5 @@ export default function GroupListScreen({ usuario, onBack, onOpenGroup }) {
     </div>
   );
 }
+
 

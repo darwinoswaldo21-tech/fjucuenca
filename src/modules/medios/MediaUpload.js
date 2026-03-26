@@ -305,21 +305,21 @@ function MediaUpload({ onUploaded, usuario }) {
 
 const estilos = {
   contenedor: { background: '#fff', borderRadius: 12, padding: 20, marginBottom: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' },
-  titulo: { color: '#1B2A6B', marginBottom: 16, fontSize: 18 },
+  titulo: { color: '#9d174d', marginBottom: 16, fontSize: 18 },
   tipoRow: { display: 'flex', gap: 8, marginBottom: 16 },
   tipoBtn: { flex: 1, padding: '10px', borderRadius: 8, border: '1.5px solid #ddd', background: '#f5f5f5', cursor: 'pointer', fontSize: 13, color: '#555' },
-  tipoActivo: { flex: 1, padding: '10px', borderRadius: 8, border: '1.5px solid #1B2A6B', background: '#EEF1FF', cursor: 'pointer', fontSize: 13, color: '#1B2A6B', fontWeight: 700 },
+  tipoActivo: { flex: 1, padding: '10px', borderRadius: 8, border: '1.5px solid #9d174d', background: '#f7e8f0', cursor: 'pointer', fontSize: 13, color: '#9d174d', fontWeight: 700 },
   inputArchivo: { display: 'block', marginBottom: 12, width: '100%' },
   inputTexto: { display: 'block', width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #ddd', marginBottom: 12, fontSize: 15, boxSizing: 'border-box' },
-  instrucciones: { background: '#f8f9ff', borderRadius: 8, padding: 12, marginBottom: 12, border: '1px solid #e0e4ff' },
-  instruccionTitulo: { color: '#1B2A6B', fontWeight: 700, fontSize: 13, marginBottom: 6 },
+  instrucciones: { background: '#faf3f6', borderRadius: 8, padding: 12, marginBottom: 12, border: '1px solid #e0e4ff' },
+  instruccionTitulo: { color: '#9d174d', fontWeight: 700, fontSize: 13, marginBottom: 6 },
   instruccionTexto: { color: '#555', fontSize: 13, marginBottom: 4 },
-  pesoTexto: { color: '#1B2A6B', fontSize: 13, marginBottom: 8, fontWeight: 600 },
+  pesoTexto: { color: '#9d174d', fontSize: 13, marginBottom: 8, fontWeight: 600 },
   progresoContenedor: { background: '#eee', borderRadius: 8, height: 10, marginBottom: 12, position: 'relative', overflow: 'hidden' },
-  progresoBarra: { background: '#1B2A6B', height: '100%', borderRadius: 8, transition: 'width 0.3s' },
+  progresoBarra: { background: '#9d174d', height: '100%', borderRadius: 8, transition: 'width 0.3s' },
   progresoTexto: { position: 'absolute', right: 8, top: -4, fontSize: 11, color: '#555' },
   error: { color: 'red', fontSize: 13, marginBottom: 8 },
-  boton: { background: '#1B2A6B', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 15, cursor: 'pointer', width: '100%' },
+  boton: { background: '#9d174d', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 15, cursor: 'pointer', width: '100%' },
   botonDesactivado: { background: '#aaa', color: '#fff', border: 'none', borderRadius: 8, padding: '12px 24px', fontSize: 15, cursor: 'not-allowed', width: '100%' },
 };
 

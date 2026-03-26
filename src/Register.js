@@ -62,16 +62,16 @@ function Register({ onBack }) {
   };
 
   return (
-    <div style={{minHeight:'100vh',background:'linear-gradient(135deg,#1B2A6B,#0D1533)',display:'flex',alignItems:'center',justifyContent:'center',padding:'20px'}}>
+    <div style={{minHeight:'100vh',background:'linear-gradient(135deg,#b1125a,#6b0f35)',display:'flex',alignItems:'center',justifyContent:'center',padding:'20px'}}>
       {notif && (
-        <div style={{position:'fixed',top:'24px',left:'50%',transform:'translateX(-50%)',background:notif.tipo==='exito'?'#1B2A6B':'#e53e3e',color:'white',padding:'16px 32px',borderRadius:'12px',boxShadow:'0 8px 32px rgba(0,0,0,0.25)',fontSize:'15px',fontWeight:'500',zIndex:1000,textAlign:'center',minWidth:'300px'}}>
+        <div style={{position:'fixed',top:'24px',left:'50%',transform:'translateX(-50%)',background:notif.tipo==='exito'?'#9d174d':'#e53e3e',color:'white',padding:'16px 32px',borderRadius:'12px',boxShadow:'0 8px 32px rgba(0,0,0,0.25)',fontSize:'15px',fontWeight:'500',zIndex:1000,textAlign:'center',minWidth:'300px'}}>
           {notif.tipo==='exito'?'OK: ':'ERROR: '}{notif.msg}
         </div>
       )}
       <div style={{background:'white',borderRadius:'24px',padding:'40px',width:'100%',maxWidth:'400px',boxShadow:'0 24px 80px rgba(0,0,0,0.4)'}}>
         <div style={{textAlign:'center',marginBottom:'28px'}}>
-          <img src="/fondo1.jpg" alt="FJU" style={{width:'80px',height:'80px',borderRadius:'50%',objectFit:'cover',border:'3px solid #1B2A6B',marginBottom:'12px'}} />
-          <h1 style={{color:'#1B2A6B',margin:'0 0 4px',fontSize:'24px',fontWeight:'700'}}>FJU Cuenca</h1>
+          <img src="/fondo1.jpg" alt="FJU" style={{width:'80px',height:'80px',borderRadius:'50%',objectFit:'cover',border:'3px solid #9d174d',marginBottom:'12px'}} />
+          <h1 style={{color:'#9d174d',margin:'0 0 4px',fontSize:'24px',fontWeight:'700'}}>FJU Cuenca</h1>
           <p style={{color:'#888',margin:0,fontSize:'14px'}}>Crea tu cuenta en la comunidad</p>
         </div>
         <label style={S.label}>NOMBRE COMPLETO</label>
@@ -81,7 +81,7 @@ function Register({ onBack }) {
         <label style={S.label}>CONTRASENA</label>
         <div style={{position:'relative',marginBottom:'8px'}}>
           <input type={verPass?'text':'password'} placeholder="Minimo 6 caracteres" value={password} onChange={(e)=>setPassword(e.target.value)} style={{...S.input,paddingRight:'48px'}} />
-          <button onClick={()=>setVerPass(!verPass)} style={{position:'absolute',right:'12px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'12px',fontWeight:'700',color:'#1B2A6B'}}>
+          <button onClick={()=>setVerPass(!verPass)} style={{position:'absolute',right:'12px',top:'50%',transform:'translateY(-50%)',background:'none',border:'none',cursor:'pointer',fontSize:'12px',fontWeight:'700',color:'#9d174d'}}>
             {verPass ? 'Ocultar' : 'Ver'}
           </button>
         </div>
@@ -95,10 +95,10 @@ function Register({ onBack }) {
             <p style={{margin:0,fontSize:'12px',color:colores[fuerza],fontWeight:'600'}}>{textos[fuerza]}</p>
           </div>
         )}
-        <button onClick={handleRegister} disabled={loading} style={{width:'100%',padding:'16px',background:loading?'#888':'linear-gradient(135deg,#1B2A6B,#3d5a99)',color:'white',border:'none',borderRadius:'12px',fontSize:'16px',cursor:loading?'not-allowed':'pointer',fontWeight:'700',marginBottom:'12px'}}>
+        <button onClick={handleRegister} disabled={loading} style={{width:'100%',padding:'16px',background:loading?'#888':'linear-gradient(135deg,#b1125a,#e04386)',color:'white',border:'none',borderRadius:'12px',fontSize:'16px',cursor:loading?'not-allowed':'pointer',fontWeight:'700',marginBottom:'12px'}}>
           {loading?'Creando cuenta...':'Crear cuenta'}
         </button>
-        <button onClick={onBack} style={{width:'100%',padding:'14px',background:'transparent',color:'#1B2A6B',border:'2px solid #1B2A6B',borderRadius:'12px',fontSize:'15px',cursor:'pointer',fontWeight:'600'}}>
+        <button onClick={onBack} style={{width:'100%',padding:'14px',background:'transparent',color:'#9d174d',border:'2px solid #9d174d',borderRadius:'12px',fontSize:'15px',cursor:'pointer',fontWeight:'600'}}>
           Ya tengo cuenta
         </button>
         <p style={{textAlign:'center',marginTop:'16px',color:'#aaa',fontSize:'12px'}}>Al registrarte aceptas ser parte de la comunidad FJU Cuenca</p>
@@ -108,3 +108,4 @@ function Register({ onBack }) {
 }
 
 export default Register;
+

@@ -42,8 +42,8 @@ function Chat({ usuario, onBack }) {
   };
 
   return (
-    <div style={{minHeight:'100vh',background:'#f0f2f5',fontFamily:'system-ui',display:'flex',flexDirection:'column'}}>
-      <div style={{background:'#1B2A6B',padding:'16px 24px',display:'flex',alignItems:'center',justifyContent:'space-between',boxShadow:'0 2px 8px rgba(0,0,0,0.2)'}}>
+    <div style={{minHeight:'100vh',background:'#f7eef2',fontFamily:'system-ui',display:'flex',flexDirection:'column'}}>
+      <div style={{background:'#9d174d',padding:'16px 24px',display:'flex',alignItems:'center',justifyContent:'space-between',boxShadow:'0 2px 8px rgba(0,0,0,0.2)'}}>
         <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
           <img src="/fondo1.jpg" alt="FJU" style={{width:'40px',height:'40px',borderRadius:'50%',objectFit:'cover',border:'2px solid white'}} />
           <div>
@@ -65,13 +65,13 @@ function Chat({ usuario, onBack }) {
           return (
             <div key={msg.id} style={{display:'flex',justifyContent:esMio?'flex-end':'flex-start',marginBottom:'12px'}}>
               {!esMio && (
-                <div style={{width:'32px',height:'32px',borderRadius:'50%',background:'linear-gradient(135deg,#1B2A6B,#3d5a99)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'700',fontSize:'13px',marginRight:'8px',flexShrink:0}}>
+                <div style={{width:'32px',height:'32px',borderRadius:'50%',background:'linear-gradient(135deg,#b1125a,#e04386)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'700',fontSize:'13px',marginRight:'8px',flexShrink:0}}>
                   {msg.autor.charAt(0).toUpperCase()}
                 </div>
               )}
               <div style={{maxWidth:'70%'}}>
                 {!esMio && <p style={{margin:'0 0 4px',fontSize:'12px',color:'#888',fontWeight:'600'}}>{msg.autor}</p>}
-                <div style={{background:esMio?'#1B2A6B':'white',color:esMio?'white':'#333',padding:'10px 16px',borderRadius:esMio?'18px 18px 4px 18px':'18px 18px 18px 4px',boxShadow:'0 1px 4px rgba(0,0,0,0.1)',fontSize:'15px',lineHeight:'1.5'}}>
+                <div style={{background:esMio?'#9d174d':'white',color:esMio?'white':'#333',padding:'10px 16px',borderRadius:esMio?'18px 18px 4px 18px':'18px 18px 18px 4px',boxShadow:'0 1px 4px rgba(0,0,0,0.1)',fontSize:'15px',lineHeight:'1.5'}}>
                   {msg.texto}
                 </div>
                 <p style={{margin:'4px 0 0',fontSize:'11px',color:'#aaa',textAlign:esMio?'right':'left'}}>
@@ -86,7 +86,7 @@ function Chat({ usuario, onBack }) {
       <div style={{background:'white',padding:'16px',boxShadow:'0 -2px 8px rgba(0,0,0,0.08)'}}>
         <div style={{maxWidth:'700px',margin:'0 auto',display:'flex',gap:'12px',alignItems:'flex-end'}}>
           <textarea placeholder="Escribe un mensaje... (Enter para enviar)" value={nuevo} onChange={(e)=>setNuevo(e.target.value)} onKeyDown={handleKey} style={{flex:1,padding:'12px',borderRadius:'12px',border:'2px solid #eee',fontSize:'15px',outline:'none',resize:'none',maxHeight:'100px',fontFamily:'system-ui'}} />
-          <button onClick={enviar} style={{padding:'12px 24px',background:'linear-gradient(135deg,#1B2A6B,#3d5a99)',color:'white',border:'none',borderRadius:'12px',fontSize:'16px',cursor:'pointer',fontWeight:'700'}}>
+          <button onClick={enviar} style={{padding:'12px 24px',background:'linear-gradient(135deg,#b1125a,#e04386)',color:'white',border:'none',borderRadius:'12px',fontSize:'16px',cursor:'pointer',fontWeight:'700'}}>
             Enviar
           </button>
         </div>

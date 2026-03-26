@@ -69,13 +69,13 @@ function Admin({ usuario, onLogout, onFeed }) {
 
   if (!canManageUsers) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f2f5', padding: '20px' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f7eef2', padding: '20px' }}>
         <div style={{ background: 'white', borderRadius: '16px', padding: '28px', maxWidth: '520px', width: '100%', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', textAlign: 'center' }}>
-          <h2 style={{ margin: '0 0 8px', color: '#1B2A6B' }}>Acceso restringido</h2>
+          <h2 style={{ margin: '0 0 8px', color: '#9d174d' }}>Acceso restringido</h2>
           <p style={{ margin: '0 0 18px', color: '#666', fontSize: '14px' }}>
             Solo el admin puede aprobar usuarios.
           </p>
-          <button onClick={onFeed} style={{ padding: '12px 18px', background: '#1B2A6B', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: '700' }}>
+          <button onClick={onFeed} style={{ padding: '12px 18px', background: '#9d174d', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: '700' }}>
             Volver
           </button>
         </div>
@@ -84,14 +84,14 @@ function Admin({ usuario, onLogout, onFeed }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f0f2f5', fontFamily: 'system-ui' }}>
+    <div style={{ minHeight: '100vh', background: '#f7eef2', fontFamily: 'system-ui' }}>
       {notif && (
-        <div style={{ position: 'fixed', top: '24px', left: '50%', transform: 'translateX(-50%)', background: notif.tipo === 'exito' ? '#1B2A6B' : '#e53e3e', color: 'white', padding: '14px 22px', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.25)', fontSize: '14px', fontWeight: '600', zIndex: 1000, textAlign: 'center', minWidth: '320px' }}>
+        <div style={{ position: 'fixed', top: '24px', left: '50%', transform: 'translateX(-50%)', background: notif.tipo === 'exito' ? '#9d174d' : '#e53e3e', color: 'white', padding: '14px 22px', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.25)', fontSize: '14px', fontWeight: '600', zIndex: 1000, textAlign: 'center', minWidth: '320px' }}>
           {notif.tipo === 'exito' ? 'OK: ' : 'ERROR: '}{notif.msg}
         </div>
       )}
 
-      <div style={{ background: '#1B2A6B', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ background: '#9d174d', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <img src="/fondo1.jpg" alt="FJU" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid white' }} />
           <div>
@@ -114,7 +114,7 @@ function Admin({ usuario, onLogout, onFeed }) {
 
       <div style={{ maxWidth: '900px', margin: '24px auto', padding: '0 16px' }}>
         <div style={{ background: 'white', borderRadius: '16px', padding: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-          <h3 style={{ margin: 0, color: '#1B2A6B' }}>Usuarios</h3>
+          <h3 style={{ margin: 0, color: '#9d174d' }}>Usuarios</h3>
           <p style={{ margin: '6px 0 0', color: '#666', fontSize: '13px' }}>
             Aprueba a los usuarios registrados. Pendientes aparecen primero.
           </p>
@@ -136,11 +136,11 @@ function Admin({ usuario, onLogout, onFeed }) {
           <div key={u.id} style={{ background: 'white', borderRadius: '16px', padding: '18px', marginTop: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg,#1B2A6B,#3d5a99)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: '800' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg,#b1125a,#e04386)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: '800' }}>
                   {(u.nombre || u.email || '?').toString().charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p style={{ margin: 0, fontWeight: '800', color: '#1B2A6B' }}>{u.nombre || 'Sin nombre'}</p>
+                  <p style={{ margin: 0, fontWeight: '800', color: '#9d174d' }}>{u.nombre || 'Sin nombre'}</p>
                   <p style={{ margin: 0, fontSize: '12px', color: '#888' }}>{u.email || 'Sin email'}</p>
                 </div>
               </div>
@@ -154,7 +154,7 @@ function Admin({ usuario, onLogout, onFeed }) {
                 </select>
 
                 {!u.aprobado ? (
-                  <button onClick={() => aprobarUsuario(u.id)} style={{ padding: '10px 14px', background: '#1B2A6B', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '13px', fontWeight: '800' }}>
+                  <button onClick={() => aprobarUsuario(u.id)} style={{ padding: '10px 14px', background: '#9d174d', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '13px', fontWeight: '800' }}>
                     Aprobar
                   </button>
                 ) : (
@@ -172,3 +172,4 @@ function Admin({ usuario, onLogout, onFeed }) {
 }
 
 export default Admin;
+

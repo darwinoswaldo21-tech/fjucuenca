@@ -89,7 +89,7 @@ function ChatPrivado({ usuario, onBack }) {
     <div
       style={{
         minHeight: '100vh',
-        background: '#f0f2f5',
+        background: '#f7eef2',
         fontFamily: 'system-ui',
         display: 'flex',
         flexDirection: 'column',
@@ -97,7 +97,7 @@ function ChatPrivado({ usuario, onBack }) {
     >
       <div
         style={{
-          background: '#1B2A6B',
+          background: '#9d174d',
           padding: '16px 24px',
           display: 'flex',
           alignItems: 'center',
@@ -144,7 +144,7 @@ function ChatPrivado({ usuario, onBack }) {
 
       {!contacto && (
         <div style={{ maxWidth: '700px', width: '100%', margin: '0 auto', padding: '20px' }}>
-          <h3 style={{ color: '#1B2A6B', margin: '0 0 12px' }}>Selecciona un contacto</h3>
+          <h3 style={{ color: '#9d174d', margin: '0 0 12px' }}>Selecciona un contacto</h3>
           {contactos.length === 0 && (
             <p style={{ color: '#888', margin: 0 }}>
               No hay contactos para mostrar.
@@ -171,7 +171,7 @@ function ChatPrivado({ usuario, onBack }) {
                   width: '44px',
                   height: '44px',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg,#1B2A6B,#3d5a99)',
+                  background: 'linear-gradient(135deg,#b1125a,#e04386)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -183,7 +183,7 @@ function ChatPrivado({ usuario, onBack }) {
                 {(u.nombre || '?').charAt(0).toUpperCase()}
               </div>
               <div>
-                <p style={{ margin: 0, fontWeight: '700', color: '#1B2A6B' }}>
+                <p style={{ margin: 0, fontWeight: '700', color: '#9d174d' }}>
                   {u.nombre || 'Sin nombre'}
                 </p>
                 <p style={{ margin: 0, fontSize: '12px', color: '#aaa' }}>{u.rol}</p>
@@ -208,7 +208,7 @@ function ChatPrivado({ usuario, onBack }) {
             <button
               onClick={() => setContacto(null)}
               style={{
-                background: '#1B2A6B',
+                background: '#9d174d',
                 color: 'white',
                 border: 'none',
                 padding: '6px 12px',
@@ -224,7 +224,7 @@ function ChatPrivado({ usuario, onBack }) {
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg,#1B2A6B,#3d5a99)',
+                background: 'linear-gradient(135deg,#b1125a,#e04386)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -234,7 +234,7 @@ function ChatPrivado({ usuario, onBack }) {
             >
               {(contacto.nombre || '?').charAt(0).toUpperCase()}
             </div>
-            <p style={{ margin: 0, fontWeight: '700', color: '#1B2A6B' }}>
+            <p style={{ margin: 0, fontWeight: '700', color: '#9d174d' }}>
               {contacto.nombre || 'Sin nombre'}
             </p>
           </div>
@@ -272,7 +272,7 @@ function ChatPrivado({ usuario, onBack }) {
                         width: '32px',
                         height: '32px',
                         borderRadius: '50%',
-                        background: 'linear-gradient(135deg,#1B2A6B,#3d5a99)',
+                        background: 'linear-gradient(135deg,#b1125a,#e04386)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -294,7 +294,7 @@ function ChatPrivado({ usuario, onBack }) {
                     )}
                     <div
                       style={{
-                        background: esMio ? '#1B2A6B' : 'white',
+                        background: esMio ? '#9d174d' : 'white',
                         color: esMio ? 'white' : '#333',
                         padding: '10px 16px',
                         borderRadius: esMio ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
@@ -346,7 +346,7 @@ function ChatPrivado({ usuario, onBack }) {
                 onClick={enviar}
                 style={{
                   padding: '12px 24px',
-                  background: 'linear-gradient(135deg,#1B2A6B,#3d5a99)',
+                  background: 'linear-gradient(135deg,#b1125a,#e04386)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '12px',
@@ -366,3 +366,4 @@ function ChatPrivado({ usuario, onBack }) {
 }
 
 export default ChatPrivado;
+

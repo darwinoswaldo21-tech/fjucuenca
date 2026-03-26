@@ -4,7 +4,7 @@ export const HELP_CATEGORIES = [
     label: 'Solicitud de Oración',
     icon: '🙏',
     description: 'Comparte tu petición con un líder de oración',
-    color: '#5C9E7A',
+    color: '#b1125a',
     leaderRole: 'prayer_leader',
   },
   {
@@ -12,7 +12,7 @@ export const HELP_CATEGORIES = [
     label: 'Apoyo Emocional',
     icon: '💬',
     description: 'Habla con un consejero de confianza',
-    color: '#D9685A',
+    color: '#e04386',
     leaderRole: 'counselor',
   },
   {
@@ -20,7 +20,7 @@ export const HELP_CATEGORIES = [
     label: 'Recursos Espirituales',
     icon: '📖',
     description: 'Devocionales, estudios y materiales',
-    color: '#4A7FC1',
+    color: '#f472b6',
     leaderRole: null,
   },
   {
@@ -28,7 +28,7 @@ export const HELP_CATEGORIES = [
     label: 'Contacto con Líderes',
     icon: '👤',
     description: 'Comunícate directamente con un líder',
-    color: '#E0A030',
+    color: '#9d174d',
     leaderRole: 'leader',
   },
 ];

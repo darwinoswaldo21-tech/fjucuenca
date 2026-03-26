@@ -72,17 +72,17 @@ function MediaComments({ photoId }) {
 
 const estilos = {
   contenedor: { marginTop: 0, padding: 12, height: '100%', display: 'flex', flexDirection: 'column' },
-  titulo: { color: '#1B2A6B', marginBottom: 10, fontSize: 15 },
+  titulo: { color: '#9d174d', marginBottom: 10, fontSize: 15 },
   lista: { flex: 1, maxHeight: 180, overflowY: 'auto', marginBottom: 10 },
   vacio: { color: '#aaa', fontSize: 13, textAlign: 'center', padding: 8 },
   comentario: { display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 8 },
-  avatarPeq: { width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#1B2A6B,#3d5a99)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: 12, flexShrink: 0 },
+  avatarPeq: { width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#b1125a,#e04386)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 700, fontSize: 12, flexShrink: 0 },
   comentarioTexto: { background: '#f5f5f5', borderRadius: 10, padding: '6px 10px', fontSize: 13, flex: 1 },
-  nombre: { color: '#1B2A6B', fontSize: 13 },
+  nombre: { color: '#9d174d', fontSize: 13 },
   texto: { color: '#333', fontSize: 13 },
   inputFila: { display: 'flex', gap: 8 },
   input: { flex: 1, border: '1px solid #ddd', borderRadius: 20, padding: '7px 12px', fontSize: 13, outline: 'none' },
-  boton: { background: '#1B2A6B', border: 'none', borderRadius: 20, padding: '7px 16px', color: 'white', fontSize: 13, cursor: 'pointer' },
+  boton: { background: '#9d174d', border: 'none', borderRadius: 20, padding: '7px 16px', color: 'white', fontSize: 13, cursor: 'pointer' },
 };
 
 export default MediaComments;

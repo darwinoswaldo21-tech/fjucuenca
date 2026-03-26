@@ -368,7 +368,7 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', borderBottom: '1px solid #eee' }}>
-                  <div style={{ fontWeight: 900, color: '#1B2A6B' }}>Notificaciones</div>
+                  <div style={{ fontWeight: 900, color: '#9d174d' }}>Notificaciones</div>
                   <button onClick={markAllRead} className="fju-chip" type="button">Marcar leido</button>
                 </div>
 
@@ -403,7 +403,7 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
                         }}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'baseline' }}>
-                          <div style={{ fontWeight: 900, color: '#1B2A6B', fontSize: 13.5 }}>
+                          <div style={{ fontWeight: 900, color: '#9d174d', fontSize: 13.5 }}>
                             {n.title || 'Notificacion'}
                           </div>
                           <div style={{ fontSize: 11, color: '#888', whiteSpace: 'nowrap' }}>{fmtNotifTime(n)}</div>
@@ -467,7 +467,7 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
               style={{
                 padding:'16px',
                 marginBottom:'12px',
-                outline: focusPostId === post.id ? '3px solid rgba(245,166,35,0.45)' : 'none'
+                outline: focusPostId === post.id ? '3px solid rgba(244,114,182,0.45)' : 'none'
               }}
             >
               <div style={{display:'flex',alignItems:'center',gap:'12px',marginBottom:'12px'}}>
@@ -475,16 +475,16 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
                   {post.autor.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p style={{margin:0,fontWeight:'700',color:'#1B2A6B'}}>{post.autor}</p>
+                  <p style={{margin:0,fontWeight:'700',color:'#9d174d'}}>{post.autor}</p>
                   <p style={{margin:0,fontSize:'12px',color:'#aaa'}}>
                     {new Date(post.fecha).toLocaleDateString('es-EC',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})}
                   </p>
                 </div>
                 {post.tipo === 'foto' && (
-                  <span style={{background:'#EEF1FF',color:'#1B2A6B',fontSize:'11px',padding:'3px 10px',borderRadius:20,fontWeight:600}}>📸 Medios</span>
+                  <span style={{background:'#f7e8f0',color:'#9d174d',fontSize:'11px',padding:'3px 10px',borderRadius:20,fontWeight:600}}>📸 Medios</span>
                 )}
                 {(post.tipo === 'video' || post.tipo === 'videoDirecto') && (
-                  <span style={{background:'#EEF1FF',color:'#1B2A6B',fontSize:'11px',padding:'3px 10px',borderRadius:20,fontWeight:600}}>🎥 Medios</span>
+                  <span style={{background:'#f7e8f0',color:'#9d174d',fontSize:'11px',padding:'3px 10px',borderRadius:20,fontWeight:600}}>🎥 Medios</span>
                 )}
                 {puedeBorar(post) && (
                   <button
@@ -545,10 +545,10 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
               const esMio = msg.autorId === auth.currentUser?.uid;
               return (
                 <div key={msg.id} style={{display:'flex',justifyContent:esMio?'flex-end':'flex-start',marginBottom:'12px'}}>
-                  {!esMio && <div style={{width:'32px',height:'32px',borderRadius:'50%',background:'linear-gradient(135deg,#1B2A6B,#3d5a99)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'700',fontSize:'13px',marginRight:'8px',flexShrink:0}}>{msg.autor.charAt(0).toUpperCase()}</div>}
+                  {!esMio && <div style={{width:'32px',height:'32px',borderRadius:'50%',background:'linear-gradient(135deg,#b1125a,#e04386)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'700',fontSize:'13px',marginRight:'8px',flexShrink:0}}>{msg.autor.charAt(0).toUpperCase()}</div>}
                   <div style={{maxWidth:'70%'}}>
                     {!esMio && <p style={{margin:'0 0 4px',fontSize:'12px',color:'#888',fontWeight:'600'}}>{msg.autor}</p>}
-                    <div style={{background:esMio?'#1B2A6B':'white',color:esMio?'white':'#333',padding:'10px 16px',borderRadius:esMio?'18px 18px 4px 18px':'18px 18px 18px 4px',boxShadow:'0 1px 4px rgba(0,0,0,0.1)',fontSize:'15px'}}>{msg.texto}</div>
+                    <div style={{background:esMio?'#9d174d':'white',color:esMio?'white':'#333',padding:'10px 16px',borderRadius:esMio?'18px 18px 4px 18px':'18px 18px 18px 4px',boxShadow:'0 1px 4px rgba(0,0,0,0.1)',fontSize:'15px'}}>{msg.texto}</div>
                     <p style={{margin:'4px 0 0',fontSize:'11px',color:'#aaa',textAlign:esMio?'right':'left'}}>{new Date(msg.fecha).toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'})}</p>
                   </div>
                 </div>
@@ -559,7 +559,7 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
           <div style={{background:'white',padding:'16px',boxShadow:'0 -2px 8px rgba(0,0,0,0.08)'}}>
             <div style={{maxWidth:'700px',margin:'0 auto',display:'flex',gap:'12px'}}>
               <textarea placeholder="Escribe un mensaje..." value={nuevoMsg} onChange={(e)=>setNuevoMsg(e.target.value)} onKeyDown={handleKey} style={{flex:1,padding:'12px',borderRadius:'12px',border:'2px solid #eee',fontSize:'15px',outline:'none',resize:'none',maxHeight:'80px',fontFamily:'system-ui'}} />
-              <button onClick={enviarChat} style={{padding:'12px 24px',background:'linear-gradient(135deg,#1B2A6B,#3d5a99)',color:'white',border:'none',borderRadius:'12px',fontSize:'16px',cursor:'pointer',fontWeight:'700'}}>Enviar</button>
+              <button onClick={enviarChat} style={{padding:'12px 24px',background:'linear-gradient(135deg,#b1125a,#e04386)',color:'white',border:'none',borderRadius:'12px',fontSize:'16px',cursor:'pointer',fontWeight:'700'}}>Enviar</button>
             </div>
           </div>
         </div>
@@ -567,14 +567,14 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
 
       {vista === 'privado' && !contacto && (
         <div style={{maxWidth:'600px',margin:'24px auto',padding:'0 16px'}}>
-          <h3 style={{color:'#1B2A6B',marginBottom:'16px'}}>Selecciona un contacto</h3>
+          <h3 style={{color:'#9d174d',marginBottom:'16px'}}>Selecciona un contacto</h3>
           {usuarios.map(u => (
             <div key={u.id} onClick={()=>setContacto(u)} style={{background:'white',borderRadius:'16px',padding:'16px 20px',marginBottom:'8px',boxShadow:'0 2px 8px rgba(0,0,0,0.08)',cursor:'pointer',display:'flex',alignItems:'center',gap:'12px'}}>
-              <div style={{width:'44px',height:'44px',borderRadius:'50%',background:'linear-gradient(135deg,#1B2A6B,#3d5a99)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'700',fontSize:'18px'}}>
+              <div style={{width:'44px',height:'44px',borderRadius:'50%',background:'linear-gradient(135deg,#b1125a,#e04386)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'700',fontSize:'18px'}}>
                 {u.nombre ? u.nombre.charAt(0).toUpperCase() : '?'}
               </div>
               <div>
-                <p style={{margin:0,fontWeight:'700',color:'#1B2A6B'}}>{u.nombre || 'Sin nombre'}</p>
+                <p style={{margin:0,fontWeight:'700',color:'#9d174d'}}>{u.nombre || 'Sin nombre'}</p>
                 <p style={{margin:0,fontSize:'12px',color:'#aaa'}}>{u.rol}</p>
               </div>
             </div>
@@ -585,11 +585,11 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
       {vista === 'privado' && contacto && (
         <div style={{display:'flex',flexDirection:'column',height:'calc(100vh - 73px)'}}>
           <div style={{background:'white',padding:'12px 24px',borderBottom:'1px solid #eee',display:'flex',alignItems:'center',gap:'12px'}}>
-            <button onClick={()=>setContacto(null)} style={{background:'#1B2A6B',color:'white',border:'none',padding:'6px 12px',borderRadius:'8px',cursor:'pointer',fontSize:'13px'}}>Atras</button>
-            <div style={{width:'36px',height:'36px',borderRadius:'50%',background:'linear-gradient(135deg,#1B2A6B,#3d5a99)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'700'}}>
+            <button onClick={()=>setContacto(null)} style={{background:'#9d174d',color:'white',border:'none',padding:'6px 12px',borderRadius:'8px',cursor:'pointer',fontSize:'13px'}}>Atras</button>
+            <div style={{width:'36px',height:'36px',borderRadius:'50%',background:'linear-gradient(135deg,#b1125a,#e04386)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'700'}}>
               {contacto.nombre.charAt(0).toUpperCase()}
             </div>
-            <p style={{margin:0,fontWeight:'700',color:'#1B2A6B'}}>{contacto.nombre}</p>
+            <p style={{margin:0,fontWeight:'700',color:'#9d174d'}}>{contacto.nombre}</p>
           </div>
           <div style={{flex:1,overflowY:'auto',padding:'20px',maxWidth:'700px',width:'100%',margin:'0 auto',boxSizing:'border-box'}}>
             {mensajesPrivado.length === 0 && <div style={{textAlign:'center',padding:'40px',color:'#aaa'}}><p style={{fontSize:'48px'}}>🔒</p><p>Conversacion privada con {contacto.nombre}</p></div>}
@@ -597,9 +597,9 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
               const esMio = msg.autorId === auth.currentUser?.uid;
               return (
                 <div key={msg.id} style={{display:'flex',justifyContent:esMio?'flex-end':'flex-start',marginBottom:'12px'}}>
-                  {!esMio && <div style={{width:'32px',height:'32px',borderRadius:'50%',background:'linear-gradient(135deg,#1B2A6B,#3d5a99)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'700',fontSize:'13px',marginRight:'8px',flexShrink:0}}>{msg.autor.charAt(0).toUpperCase()}</div>}
+                  {!esMio && <div style={{width:'32px',height:'32px',borderRadius:'50%',background:'linear-gradient(135deg,#b1125a,#e04386)',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'700',fontSize:'13px',marginRight:'8px',flexShrink:0}}>{msg.autor.charAt(0).toUpperCase()}</div>}
                   <div style={{maxWidth:'70%'}}>
-                    <div style={{background:esMio?'#1B2A6B':'white',color:esMio?'white':'#333',padding:'10px 16px',borderRadius:esMio?'18px 18px 4px 18px':'18px 18px 18px 4px',boxShadow:'0 1px 4px rgba(0,0,0,0.1)',fontSize:'15px'}}>{msg.texto}</div>
+                    <div style={{background:esMio?'#9d174d':'white',color:esMio?'white':'#333',padding:'10px 16px',borderRadius:esMio?'18px 18px 4px 18px':'18px 18px 18px 4px',boxShadow:'0 1px 4px rgba(0,0,0,0.1)',fontSize:'15px'}}>{msg.texto}</div>
                     <p style={{margin:'4px 0 0',fontSize:'11px',color:'#aaa',textAlign:esMio?'right':'left'}}>{new Date(msg.fecha).toLocaleTimeString('es-EC',{hour:'2-digit',minute:'2-digit'})}</p>
                   </div>
                 </div>
@@ -610,7 +610,7 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
           <div style={{background:'white',padding:'16px',boxShadow:'0 -2px 8px rgba(0,0,0,0.08)'}}>
             <div style={{maxWidth:'700px',margin:'0 auto',display:'flex',gap:'12px'}}>
               <textarea placeholder="Escribe un mensaje privado..." value={nuevoMsg} onChange={(e)=>setNuevoMsg(e.target.value)} onKeyDown={handleKey} style={{flex:1,padding:'12px',borderRadius:'12px',border:'2px solid #eee',fontSize:'15px',outline:'none',resize:'none',maxHeight:'80px',fontFamily:'system-ui'}} />
-              <button onClick={enviarPrivado} style={{padding:'12px 24px',background:'linear-gradient(135deg,#1B2A6B,#3d5a99)',color:'white',border:'none',borderRadius:'12px',fontSize:'16px',cursor:'pointer',fontWeight:'700'}}>Enviar</button>
+              <button onClick={enviarPrivado} style={{padding:'12px 24px',background:'linear-gradient(135deg,#b1125a,#e04386)',color:'white',border:'none',borderRadius:'12px',fontSize:'16px',cursor:'pointer',fontWeight:'700'}}>Enviar</button>
             </div>
           </div>
         </div>
@@ -620,3 +620,5 @@ function Feed({ usuario, onLogout, onAdmin, onHelp, onMedias, onGroups, onChat, 
 }
 
 export default Feed;
+
+
